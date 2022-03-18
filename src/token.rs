@@ -63,6 +63,8 @@ pub struct Extension {
     pub protected_attributes: Option<Vec<String>>,
     /// token subtypes used by Stashh for display groupings (primarily used for badges)
     pub token_subtype: Option<String>,
+    /// represents public and privite key pair for authentication in public and private metadata respectively.
+    pub auth_key: Option<[u8; 32]>
 }
 
 /// attribute trait

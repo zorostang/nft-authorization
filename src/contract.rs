@@ -42,6 +42,13 @@ pub const BLOCK_SIZE: usize = 256;
 /// max number of token ids to keep in id list block
 pub const ID_BLOCK_SIZE: u32 = 64;
 
+// For randomization
+use rand_chacha::ChaChaRng;
+use rand::{RngCore, SeedableRng, AsByteSliceMut};
+use crate::rand::Prng;
+//use rand_core::OsRng;
+use x25519_dalek::{StaticSecret, PublicKey};
+
 ////////////////////////////////////// Init ///////////////////////////////////////
 /// Returns InitResult
 ///
@@ -446,6 +453,63 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
         }
     };
     pad_handle_result(response, BLOCK_SIZE)
+}
+
+/// Returns (PublicKey, StaticSecret)
+///
+/// generates a public and privite key pair and updates the PRNG_SEED with user input.
+/// 
+/// # Arguments
+/// 
+/// * `deps` - mutable reference to Extern containing all the contract's external dependencies
+/// * `env` - Env of contract's environment
+/// * `user_entropy` - random string input by the user
+pub fn generate_keypairs<S: Storage, A: Api, Q: Querier>(
+    deps: &mut Extern<S, A, Q>,
+    env: &Env,
+    user_entropy: Option<String>
+) -> (PublicKey, StaticSecret) {
+
+    // generate new rng seed
+    let old_prng_seed: Vec<u8> = load(&deps.storage, PRNG_SEED_KEY).unwrap();
+    let new_prng_seed: [u8; 32];
+    match user_entropy {
+        Some(s) => new_prng_seed = new_entropy(env, old_prng_seed.as_ref(), s.as_bytes()),
+        None => new_prng_seed = new_entropy(env, old_prng_seed.as_ref(), old_prng_seed.as_ref()),
+    }
+
+    // store the new seed
+    save(&mut deps.storage, PRNG_SEED_KEY, &new_prng_seed).unwrap();
+
+    // generate key pair
+    let rng = ChaChaRng::from_seed(new_prng_seed);
+    let scrt_key = StaticSecret::new(rng);
+    let pub_key = PublicKey::from(&scrt_key);
+
+    return (pub_key, scrt_key);
+}
+
+/// Returns [u8;32]
+/// 
+/// generates new entropy (to be used in keypair generation), does not save it to the contract.
+/// 
+/// # Arguments
+/// 
+/// * `env` - Env of contract's environment
+/// * `seed` - (user generated) seed for rng
+/// * `entropy` - Entropy seed saved in the contract
+pub fn new_entropy(env: &Env, seed: &[u8], entropy: &[u8])-> [u8;32]{
+    // 16 here represents the lengths in bytes of the block height and time.
+    let entropy_len = 16 + env.message.sender.len() + entropy.len();
+    let mut rng_entropy = Vec::with_capacity(entropy_len);
+    rng_entropy.extend_from_slice(&env.block.height.to_be_bytes());
+    rng_entropy.extend_from_slice(&env.block.time.to_be_bytes());
+    rng_entropy.extend_from_slice(&env.message.sender.0.as_bytes());
+    rng_entropy.extend_from_slice(entropy);
+
+    let mut rng = Prng::new(seed, &rng_entropy);
+
+    rng.rand_bytes()
 }
 
 /// Returns HandleResult
