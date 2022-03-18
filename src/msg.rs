@@ -123,6 +123,8 @@ pub enum HandleMsg {
         memo: Option<String>,
         /// optional message length padding
         padding: Option<String>,
+        /// optional entropy for generating keypair.  Defaults to None if omited.
+        entropy: Option<String>,
     },
     /// Mint multiple tokens
     BatchMintNft {
@@ -130,6 +132,8 @@ pub enum HandleMsg {
         mints: Vec<Mint>,
         /// optional message length padding
         padding: Option<String>,
+        /// optional entropy for generating keypair.  Defaults to None if omited.
+        entropy: Option<String>,
     },
     /// create a mint run of clones that will have MintRunInfos showing they are serialized
     /// copies in the same mint run with the specified quantity.  Mint_run_id can be used to

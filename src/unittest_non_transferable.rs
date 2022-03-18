@@ -374,6 +374,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -469,6 +470,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -597,6 +599,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -705,6 +708,7 @@ mod tests {
             transferable: Some(false),
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -830,6 +834,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -903,6 +908,7 @@ mod tests {
             transferable: Some(false),
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());

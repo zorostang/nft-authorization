@@ -609,6 +609,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -657,6 +658,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());

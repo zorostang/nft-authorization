@@ -289,6 +289,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -304,6 +305,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None
         };
         let handle_result = handle(&mut deps, mock_env("alice", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -313,6 +315,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
+            entropy: None
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let minted_vec = vec![
@@ -391,6 +394,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -431,6 +435,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -461,6 +466,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -485,6 +491,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("alice", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -517,6 +524,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: pub_expect.clone(),
             private_metadata: priv_expect.clone(),
@@ -578,6 +586,7 @@ mod tests {
         // test minting with an existing token id
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: Some(Metadata {
                 token_uri: None,
@@ -627,6 +636,7 @@ mod tests {
             transferable: None,
             memo: Some("Admin wants his own".to_string()),
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let minted_str = "1".to_string();
@@ -777,6 +787,7 @@ mod tests {
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: Some(Metadata {
                 token_uri: None,
@@ -844,6 +855,7 @@ mod tests {
         );
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: Some(Metadata {
                 token_uri: None,
@@ -889,6 +901,7 @@ mod tests {
         );
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: Some(Metadata {
                 token_uri: None,
@@ -970,6 +983,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: Some(Metadata {
                 token_uri: None,
@@ -1000,6 +1014,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -1191,6 +1206,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: pub_expect.clone(),
             private_metadata: None,
@@ -1278,6 +1294,7 @@ mod tests {
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -1340,6 +1357,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: seal_meta.clone(),
             public_metadata: None,
@@ -1396,6 +1414,7 @@ mod tests {
         );
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: seal_meta.clone(),
             public_metadata: None,
@@ -1485,6 +1504,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let pub2 = Some(Metadata {
@@ -1506,6 +1526,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg); // test burn when status prevents it
         let pub3 = Some(Metadata {
@@ -1527,6 +1548,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let pub4 = Some(Metadata {
@@ -1548,6 +1570,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -3450,6 +3473,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: priv_expect.clone(),
             public_metadata: None,
@@ -3769,6 +3793,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -3789,6 +3814,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -3959,6 +3985,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: priv_expect.clone(),
             public_metadata: None,
@@ -4345,6 +4372,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -4365,6 +4393,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -4485,6 +4514,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -4573,6 +4603,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -4802,6 +4833,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let priv3 = Some(Metadata {
@@ -4832,6 +4864,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::Approve {
@@ -4998,6 +5031,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5050,6 +5084,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5063,6 +5098,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let priv3 = Some(Metadata {
@@ -5093,6 +5129,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5105,6 +5142,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5117,6 +5155,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5129,6 +5168,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5141,6 +5181,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5153,6 +5194,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5304,6 +5346,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5317,6 +5360,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5329,6 +5373,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5341,6 +5386,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5353,6 +5399,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5365,6 +5412,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5377,6 +5425,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5389,6 +5438,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5535,6 +5585,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5548,6 +5599,7 @@ mod tests {
             transferable: Some(false),
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5560,6 +5612,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5572,6 +5625,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5584,6 +5638,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5596,6 +5651,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5608,6 +5664,7 @@ mod tests {
             transferable: Some(false),
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -5620,6 +5677,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -5921,6 +5979,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -6020,6 +6079,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: priv1.clone(),
             public_metadata: pub1.clone(),
@@ -6478,6 +6538,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -6642,6 +6703,7 @@ mod tests {
                 },
             ],
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -6809,6 +6871,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -6822,6 +6885,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -6834,6 +6898,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -6846,6 +6911,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -6858,6 +6924,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -6870,6 +6937,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -7243,6 +7311,7 @@ mod tests {
                 },
             ],
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -7386,6 +7455,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -7491,6 +7561,7 @@ mod tests {
         });
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: priv1.clone(),
             public_metadata: pub1.clone(),
@@ -7971,6 +8042,7 @@ mod tests {
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
+            entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: Some(Metadata {
                 token_uri: None,
@@ -8085,6 +8157,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -8098,6 +8171,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -8110,6 +8184,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -8122,6 +8197,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -8134,6 +8210,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -8146,6 +8223,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -8616,6 +8694,7 @@ mod tests {
                 },
             ],
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::SetWhitelistedApproval {
@@ -9414,6 +9493,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -9426,6 +9506,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg); // test burn when status prevents it
         let handle_msg = HandleMsg::MintNft {
@@ -9438,6 +9519,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -9632,6 +9714,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -9644,6 +9727,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg); // test burn when status prevents it
         let handle_msg = HandleMsg::MintNft {
@@ -9656,6 +9740,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -9981,6 +10066,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -10338,6 +10424,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let pub2 = Some(Metadata {
@@ -10359,6 +10446,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -10397,6 +10485,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -10409,6 +10498,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -10718,6 +10808,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -10730,6 +10821,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
@@ -10905,6 +10997,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
@@ -10917,6 +11010,7 @@ mod tests {
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
