@@ -214,6 +214,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         let alice = HumanAddr("alice".to_string());
         let alice_raw = deps.api.canonical_address(&alice).unwrap();
         let admin = HumanAddr("admin".to_string());
@@ -241,7 +262,7 @@ mod tests {
                 token_id: None,
                 owner: Some(alice.clone()),
                 public_metadata: Some(pub1.clone()),
-                private_metadata: None,
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 serial_number: None,
                 transferable: None,
@@ -250,7 +271,7 @@ mod tests {
             Mint {
                 token_id: Some("NFT2".to_string()),
                 owner: None,
-                public_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
                 private_metadata: Some(priv2.clone()),
                 royalty_info: None,
                 serial_number: None,
@@ -260,8 +281,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT3".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: None,
                 serial_number: None,
@@ -270,8 +291,8 @@ mod tests {
             Mint {
                 token_id: None,
                 owner: Some(admin.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: None,
                 serial_number: None,
@@ -404,6 +425,27 @@ mod tests {
     // test minting
     #[test]
     fn test_mint() {
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         let (init_result, mut deps) = init_helper_default();
         assert!(
             init_result.is_ok(),
@@ -460,7 +502,7 @@ mod tests {
                     ..Extension::default()
                 }),
             }),
-            private_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -470,7 +512,7 @@ mod tests {
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
-        assert!(error.contains("Metadata can not have BOTH token_uri AND extension"));
+        assert!(error.contains("token_uri cannot be used with nft authorization"));
 
         // test non-minter attempt
         let handle_msg = HandleMsg::MintNft {
@@ -504,7 +546,7 @@ mod tests {
             "Init failed: {}",
             init_result.err().unwrap()
         );
-        let pub_expect = Some(Metadata {
+        let pub_meta = Some(Metadata {
             token_uri: None,
             extension: Some(Extension {
                 name: Some("MyNFT".to_string()),
@@ -513,7 +555,7 @@ mod tests {
                 ..Extension::default()
             }),
         });
-        let priv_expect = Some(Metadata {
+        let priv_meta = Some(Metadata {
             token_uri: None,
             extension: Some(Extension {
                 name: Some("MyNFTpriv".to_string()),
@@ -526,14 +568,35 @@ mod tests {
             token_id: Some("MyNFT".to_string()),
             entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
-            public_metadata: pub_expect.clone(),
-            private_metadata: priv_expect.clone(),
+            public_metadata: pub_meta.clone(),
+            private_metadata: priv_meta.clone(),
             royalty_info: None,
             serial_number: None,
             transferable: None,
             memo: Some("Mint it baby!".to_string()),
             padding: None,
         };
+
+        let pub_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: None,
+                image: Some("uri".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                ..Extension::default()
+            }),
+        });
+        let priv_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFTpriv".to_string()),
+                description: Some("Nifty".to_string()),
+                image: Some("privuri".to_string()),
+                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                ..Extension::default()
+            }),
+        });
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let minted = extract_log(handle_result);
         assert!(minted.contains("MyNFT"));
@@ -616,8 +679,8 @@ mod tests {
         let error = extract_error_msg(handle_result);
         assert!(error.contains("Token ID MyNFT is already in use"));
 
-        // test minting without specifying recipient or id
-        let pub_expect = Some(Metadata {
+        // test minting without specifying recipient or id and with entropy
+        let pub_meta = Some(Metadata {
             token_uri: None,
             extension: Some(Extension {
                 name: Some("AdminNFT".to_string()),
@@ -629,15 +692,26 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: None,
             owner: None,
-            public_metadata: pub_expect.clone(),
-            private_metadata: None,
+            public_metadata: pub_meta.clone(),
+            private_metadata: Some(empty_metadata),
             royalty_info: None,
             serial_number: None,
             transferable: None,
             memo: Some("Admin wants his own".to_string()),
             padding: None,
-            entropy: None,
+            entropy: Some("test".to_string()),
         };
+
+        let pub_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("AdminNFT".to_string()),
+                description: None,
+                image: None,
+                auth_key: Some([2, 99, 130, 216, 58, 179, 225, 37, 98, 200, 87, 214, 73, 113, 15, 61, 73, 173, 63, 60, 31, 157, 254, 225, 79, 80, 78, 246, 26, 57, 109, 57]),
+                ..Extension::default()
+            }),
+        });
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let minted_str = "1".to_string();
         let handle_answer: HandleAnswer =
@@ -670,9 +744,10 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &token_key).unwrap();
         assert_eq!(pub_meta, pub_expect.unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &token_key).unwrap();
-        assert!(priv_meta.is_none());
+        // (private meta test is no longer valid due to authentication)
+        // let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
+        // let priv_meta: Option<Metadata> = may_load(&priv_store, &token_key).unwrap();
+        // assert!(priv_meta.is_none());
         // verify token is in the owner list
         assert!(Inventory::owns(&deps.storage, &admin_raw, 1).unwrap());
         // verify mint tx was logged
@@ -3945,6 +4020,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         // test token does not exist when supply is public
         let handle_msg = HandleMsg::Revoke {
             spender: HumanAddr("bob".to_string()),
@@ -3974,7 +4070,7 @@ mod tests {
             error.contains("Not authorized to grant/revoke transfer permission for token MyNFT")
         );
 
-        let priv_expect = Some(Metadata {
+        let priv_meta = Some(Metadata {
             token_uri: None,
             extension: Some(Extension {
                 name: Some("MyNFT".to_string()),
@@ -3987,14 +4083,26 @@ mod tests {
             token_id: Some("MyNFT".to_string()),
             entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: priv_expect.clone(),
-            public_metadata: None,
+            private_metadata: priv_meta.clone(),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
             memo: None,
             padding: None,
         };
+
+        let priv_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("metadata".to_string()),
+                image: Some("uri".to_string()),
+                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                ..Extension::default()
+            }),
+        });
+
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
         // test contract status does not allow
@@ -4100,7 +4208,7 @@ mod tests {
         let view_meta_idx = PermissionType::ViewMetadata.to_usize();
         let transfer_idx = PermissionType::Transfer.to_usize();
 
-        // test operator tries to revoke permission from another operator
+        // test operator tries to revoke permission from another operator.
         let handle_msg = HandleMsg::Revoke {
             spender: HumanAddr("charlie".to_string()),
             token_id: "MyNFT".to_string(),
@@ -4130,7 +4238,7 @@ mod tests {
         assert!(error.contains("Can not revoke transfer permission from an existing operator"));
 
         // sanity check:  operator revokes approval from an expired operator will delete
-        // the expired ALL permission
+        // the expired ALL permission. IMPORTANT.
         let handle_msg = HandleMsg::Revoke {
             spender: HumanAddr("charlie".to_string()),
             token_id: "MyNFT".to_string(),
@@ -4168,9 +4276,10 @@ mod tests {
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
         assert_eq!(priv_meta, priv_expect.clone().unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &tok_key).unwrap();
-        assert!(pub_meta.is_none());
+        // empty public metadata part of this test is not valid anymore.
+        // let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        // let pub_meta: Option<Metadata> = may_load(&pub_store, &tok_key).unwrap();
+        // assert!(pub_meta.is_none());
         // confirm AuthList is still empty
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
         let auth_list: Option<Vec<AuthList>> = may_load(&auth_store, alice_key).unwrap();
@@ -4261,9 +4370,6 @@ mod tests {
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
         assert_eq!(priv_meta, priv_expect.clone().unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &tok_key).unwrap();
-        assert!(pub_meta.is_none());
         assert!(token.permissions.is_empty());
         // confirm AuthList removed charlie
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
@@ -4291,9 +4397,6 @@ mod tests {
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
         assert_eq!(priv_meta, priv_expect.clone().unwrap());
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &tok_key).unwrap();
-        assert!(pub_meta.is_none());
-        assert!(token.permissions.is_empty());
         // confirm AuthList doesn not contain charlie
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
         let auth_list: Option<Vec<AuthList>> = may_load(&auth_store, alice_key).unwrap();
@@ -4337,9 +4440,6 @@ mod tests {
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
         assert_eq!(priv_meta, priv_expect.clone().unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &tok_key).unwrap();
-        assert!(pub_meta.is_none());
         assert!(token.permissions.is_empty());
         // confirm AuthList does not contain bob
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
@@ -4366,7 +4466,7 @@ mod tests {
             token_id: Some("MyNFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
             private_metadata: priv2.clone(),
-            public_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -4374,6 +4474,17 @@ mod tests {
             padding: None,
             entropy: None,
         };
+
+        let priv2_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT2".to_string()),
+                description: Some("metadata2".to_string()),
+                image: Some("uri2".to_string()),
+                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                ..Extension::default()
+            }),
+        });
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT3".to_string()),
@@ -4387,7 +4498,7 @@ mod tests {
                     ..Extension::default()
                 }),
             }),
-            public_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -4469,10 +4580,7 @@ mod tests {
         assert!(token.unwrapped);
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok2_key).unwrap();
-        assert_eq!(priv_meta, priv2.clone().unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &tok2_key).unwrap();
-        assert!(pub_meta.is_none());
+        assert_eq!(priv_meta, priv2_expect.clone().unwrap());
         // confirm MyNFT3 token permission added david with ALL permission's expiration
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
         let token: Token = json_load(&info_store, &tok3_key).unwrap();
@@ -10015,6 +10123,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         // test token does not exist when supply is public
         let handle_msg = HandleMsg::SetGlobalApproval {
             token_id: Some("NFT1".to_string()),
@@ -10060,7 +10189,7 @@ mod tests {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: pub1.clone(),
-            private_metadata: None,
+            private_metadata: Some(empty_metadata),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -10068,6 +10197,17 @@ mod tests {
             padding: None,
             entropy: None,
         };
+
+        let pub1_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("My1".to_string()),
+                description: Some("Pub 1".to_string()),
+                image: Some("URI 1".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                ..Extension::default()
+            }),
+        });
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
 
         // test trying to set approval when status does not allow
@@ -10170,10 +10310,11 @@ mod tests {
         assert!(token.unwrapped);
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
-        assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
+        assert_eq!(pub_meta, pub1_expect.unwrap());
+        // this part of the test is invalid since we do not allow empty metadata
+        // let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
+        // let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
+        // assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let global_tok_perm = token
             .permissions

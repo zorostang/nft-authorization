@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::CanonicalAddr;
+use cosmwasm_std::{CanonicalAddr, StdResult, StdError};
 
 use crate::state::Permission;
 
@@ -27,6 +27,26 @@ pub struct Metadata {
     pub token_uri: Option<String>,
     /// optional on-chain metadata.  Only use this if you are not using `token_uri`
     pub extension: Option<Extension>,
+}
+
+impl Metadata {
+    pub fn add_auth_key(&self, new_key: &[u8; 32]) -> StdResult<Metadata> {
+        match &self.extension {
+            Some(ext) => {
+                return Ok(
+                    Metadata {
+                        token_uri: None,
+                        extension: Some(ext.add_auth_key(new_key)),
+                    }
+                );
+            },
+            None => {
+                return Err(StdError::generic_err(
+                    "the metadata does not cointain extension while authorization key is being added.",
+                ));
+            }
+        }
+    }
 }
 
 /// metadata extension
@@ -65,6 +85,27 @@ pub struct Extension {
     pub token_subtype: Option<String>,
     /// represents public and privite key pair for authentication in public and private metadata respectively.
     pub auth_key: Option<[u8; 32]>
+}
+
+impl Extension {
+    fn add_auth_key(&self, new_key: &[u8; 32]) -> Extension {
+        let self_clone = self.clone();
+        Extension {
+            image: self_clone.image,
+            image_data: self_clone.image_data,
+            external_url: self_clone.external_url,
+            description: self_clone.description,
+            name: self_clone.name,
+            attributes: self_clone.attributes,
+            background_color: self_clone.background_color,
+            animation_url: self_clone.animation_url,
+            youtube_url: self_clone.youtube_url,
+            media: self_clone.media,
+            protected_attributes: self_clone.protected_attributes,
+            token_subtype: self_clone.token_subtype,
+            auth_key: Some(new_key.clone()),
+        }
+    }
 }
 
 /// attribute trait

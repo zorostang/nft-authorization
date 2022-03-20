@@ -7,14 +7,14 @@ use cosmwasm_storage::{PrefixedStorage, ReadonlyPrefixedStorage};
 use primitive_types::U256;
 /// This contract implements SNIP-721 standard:
 /// https://github.com/SecretFoundation/SNIPs/blob/master/SNIP-721.md
-use std::collections::HashSet;
+use std::{collections::HashSet, ops::Not};
 
 use secret_toolkit::{
     permit::{validate, Permit, RevokedPermits},
     utils::{pad_handle_result, pad_query_result},
 };
 
-use crate::expiration::Expiration;
+use crate::{expiration::Expiration, token::Extension};
 use crate::inventory::{Inventory, InventoryIter};
 use crate::mint_run::{SerialNumber, StoredMintRunInfo};
 use crate::msg::{
@@ -158,6 +158,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             royalty_info,
             transferable,
             memo,
+            entropy,
             ..
         } => mint(
             deps,
@@ -172,13 +173,15 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             royalty_info,
             transferable,
             memo,
+            entropy,
         ),
-        HandleMsg::BatchMintNft { mints, .. } => batch_mint(
+        HandleMsg::BatchMintNft { mints, entropy, .. } => batch_mint(
             deps,
             env,
             &mut config,
             ContractStatus::Normal.to_u8(),
             mints,
+            entropy
         ),
         HandleMsg::MintNftClones {
             mint_run_id,
@@ -188,6 +191,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             private_metadata,
             royalty_info,
             memo,
+            entropy,
             ..
         } => mint_clones(
             deps,
@@ -201,6 +205,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             private_metadata,
             royalty_info,
             memo,
+            entropy,
         ),
         HandleMsg::SetMetadata {
             token_id,
@@ -455,38 +460,34 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
     pad_handle_result(response, BLOCK_SIZE)
 }
 
-/// Returns (PublicKey, StaticSecret)
+/// Returns (PublicKey, StaticSecret, Vec<u8>)
 ///
-/// generates a public and privite key pair and updates the PRNG_SEED with user input.
+/// generates a public and privite key pair and generates a new PRNG_SEED with or without user entropy.
 /// 
 /// # Arguments
-/// 
-/// * `deps` - mutable reference to Extern containing all the contract's external dependencies
-/// * `env` - Env of contract's environment
-/// * `user_entropy` - random string input by the user
-pub fn generate_keypairs<S: Storage, A: Api, Q: Querier>(
-    deps: &mut Extern<S, A, Q>,
+///
+/// * `env` - contract's environment to be used for randomization
+/// * `prng_seed` - required prng seed for randomization
+/// * `user_entropy` - optional random string input by the user
+pub fn generate_keypair(
     env: &Env,
+    prng_seed: Vec<u8>,
     user_entropy: Option<String>
-) -> (PublicKey, StaticSecret) {
+) -> (PublicKey, StaticSecret, Vec<u8>) {
 
     // generate new rng seed
-    let old_prng_seed: Vec<u8> = load(&deps.storage, PRNG_SEED_KEY).unwrap();
-    let new_prng_seed: [u8; 32];
+    let new_prng_bytes: [u8; 32];
     match user_entropy {
-        Some(s) => new_prng_seed = new_entropy(env, old_prng_seed.as_ref(), s.as_bytes()),
-        None => new_prng_seed = new_entropy(env, old_prng_seed.as_ref(), old_prng_seed.as_ref()),
+        Some(s) => new_prng_bytes = new_entropy(env, prng_seed.as_ref(), s.as_bytes()),
+        None => new_prng_bytes = new_entropy(env, prng_seed.as_ref(), prng_seed.as_ref()),
     }
 
-    // store the new seed
-    save(&mut deps.storage, PRNG_SEED_KEY, &new_prng_seed).unwrap();
-
-    // generate key pair
-    let rng = ChaChaRng::from_seed(new_prng_seed);
+    // generate and return key pair
+    let rng = ChaChaRng::from_seed(new_prng_bytes);
     let scrt_key = StaticSecret::new(rng);
     let pub_key = PublicKey::from(&scrt_key);
 
-    return (pub_key, scrt_key);
+    return (pub_key, scrt_key, new_prng_bytes.to_vec());
 }
 
 /// Returns [u8;32]
@@ -498,7 +499,7 @@ pub fn generate_keypairs<S: Storage, A: Api, Q: Querier>(
 /// * `env` - Env of contract's environment
 /// * `seed` - (user generated) seed for rng
 /// * `entropy` - Entropy seed saved in the contract
-pub fn new_entropy(env: &Env, seed: &[u8], entropy: &[u8])-> [u8;32]{
+pub fn new_entropy(env: &Env, seed: &[u8], entropy: &[u8])-> [u8;32] {
     // 16 here represents the lengths in bytes of the block height and time.
     let entropy_len = 16 + env.message.sender.len() + entropy.len();
     let mut rng_entropy = Vec::with_capacity(entropy_len);
@@ -544,6 +545,7 @@ pub fn mint<S: Storage, A: Api, Q: Querier>(
     royalty_info: Option<RoyaltyInfo>,
     transferable: Option<bool>,
     memo: Option<String>,
+    entropy: Option<String>,
 ) -> HandleResult {
     check_status(config.status, priority)?;
     let sender_raw = deps.api.canonical_address(&env.message.sender)?;
@@ -564,7 +566,7 @@ pub fn mint<S: Storage, A: Api, Q: Querier>(
         transferable,
         memo,
     }];
-    let mut minted = mint_list(deps, &env, config, &sender_raw, mints)?;
+    let mut minted = mint_list(deps, &env, config, &sender_raw, mints, entropy)?;
     let minted_str = minted.pop().unwrap_or_else(String::new);
     Ok(HandleResponse {
         messages: vec![],
@@ -592,6 +594,7 @@ pub fn batch_mint<S: Storage, A: Api, Q: Querier>(
     config: &mut Config,
     priority: u8,
     mints: Vec<Mint>,
+    entropy: Option<String>,
 ) -> HandleResult {
     check_status(config.status, priority)?;
     let sender_raw = deps.api.canonical_address(&env.message.sender)?;
@@ -602,7 +605,7 @@ pub fn batch_mint<S: Storage, A: Api, Q: Querier>(
             "Only designated minters are allowed to mint",
         ));
     }
-    let minted = mint_list(deps, &env, config, &sender_raw, mints)?;
+    let minted = mint_list(deps, &env, config, &sender_raw, mints, entropy)?;
     Ok(HandleResponse {
         messages: vec![],
         log: vec![log("minted", format!("{:?}", &minted))],
@@ -642,6 +645,7 @@ pub fn mint_clones<S: Storage, A: Api, Q: Querier>(
     private_metadata: Option<Metadata>,
     royalty_info: Option<RoyaltyInfo>,
     memo: Option<String>,
+    entropy: Option<String>,
 ) -> HandleResult {
     check_status(config.status, priority)?;
     let sender_raw = deps.api.canonical_address(&env.message.sender)?;
@@ -689,7 +693,7 @@ pub fn mint_clones<S: Storage, A: Api, Q: Querier>(
         });
         serial_number.serial_number += 1;
     }
-    let mut minted = mint_list(deps, &env, config, &sender_raw, mints)?;
+    let mut minted = mint_list(deps, &env, config, &sender_raw, mints, entropy)?;
     // if mint_list did not error, there must be at least one token id
     let first_minted = minted
         .first()
@@ -4645,10 +4649,14 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
     config: &mut Config,
     sender_raw: &CanonicalAddr,
     mints: Vec<Mint>,
+    user_entropy: Option<String>,
 ) -> StdResult<Vec<String>> {
     let mut inventories: Vec<Inventory> = Vec::new();
     let mut minted: Vec<String> = Vec::new();
     let default_roy: Option<StoredRoyaltyInfo> = may_load(&deps.storage, DEFAULT_ROYALTY_KEY)?;
+    let mut prng_seed: Vec<u8>; 
+    prng_seed = load(&deps.storage, PRNG_SEED_KEY).unwrap();
+
     for mint in mints.into_iter() {
         let id = mint.token_id.unwrap_or(format!("{}", config.mint_cnt));
         // check if id already exists
@@ -4703,17 +4711,44 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
         // If you wanted to store an additional data struct for each NFT, you would create
         // a new prefix and store with the `token_key` like below
         //
-        // save the metadata
-        if let Some(pub_meta) = mint.public_metadata {
-            enforce_metadata_field_exclusion(&pub_meta)?;
-            let mut pub_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
-            save(&mut pub_store, &token_key, &pub_meta)?;
+        // save the metadata with keypair generation
+
+        let (pubkey, scrtkey, new_prng_seed) = generate_keypair(env, prng_seed, user_entropy.clone());
+        prng_seed  = new_prng_seed;
+
+        let maybe_priv_meta = mint.private_metadata;
+        match maybe_priv_meta {
+            Some(priv_meta) => {
+                enforce_metadata_is_extension(&priv_meta)?;
+                let priv_meta_with_auth = priv_meta.add_auth_key(&scrtkey.to_bytes());
+                //priv_meta.extension.unwrap().auth_key = Some(scrtkey.to_bytes());
+                let mut priv_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
+                save(&mut priv_store, &token_key, &priv_meta_with_auth.unwrap())?;
+            }
+            None => {
+                return Err(StdError::generic_err(
+                    "No private metadata is provided. You must provide some metadata 
+                    even if all the fields are all missing since the authentication keys are stored in extension metadata.",
+                ));
+            }
         }
-        if let Some(priv_meta) = mint.private_metadata {
-            enforce_metadata_field_exclusion(&priv_meta)?;
-            let mut priv_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
-            save(&mut priv_store, &token_key, &priv_meta)?;
+
+        let  maybe_pub_meta = mint.public_metadata;
+        match maybe_pub_meta {
+            Some(pub_meta) => {
+                enforce_metadata_is_extension(&pub_meta)?;
+                let pub_meta_with_auth = pub_meta.add_auth_key(&pubkey.to_bytes());
+                let mut pub_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
+                save(&mut pub_store, &token_key, &pub_meta_with_auth.unwrap())?;
+            }
+            None => {
+                return Err(StdError::generic_err(
+                    "No public metadata is provided. You must provide some metadata 
+                    even if all the fields are all missing since the authentication keys are stored in extension metadata.",
+                ));
+            }
         }
+
         // save the mint run info
         let (mint_run, serial_number, quantity_minted_this_run) =
             if let Some(ser) = mint.serial_number {
@@ -4764,6 +4799,11 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
             StdError::generic_err("Attempting to mint more times than the implementation limit")
         })?;
     }
+
+    // save the final prng seed:
+    save(&mut deps.storage, PRNG_SEED_KEY, &prng_seed).unwrap();
+
+
     // save all the updated inventories
     for inventory in inventories.iter() {
         inventory.save(&mut deps.storage)?;
@@ -4829,6 +4869,26 @@ fn enforce_metadata_field_exclusion(metadata: &Metadata) -> StdResult<()> {
     if metadata.token_uri.is_some() && metadata.extension.is_some() {
         return Err(StdError::generic_err(
             "Metadata can not have BOTH token_uri AND extension",
+        ));
+    }
+    Ok(())
+}
+
+/// Returns StdResult<()>
+///
+/// makes sure that Metadata does not have `token_uri` and has extension
+///
+/// # Arguments
+///
+/// * `metadata` - a reference to Metadata
+fn enforce_metadata_is_extension(metadata: &Metadata) -> StdResult<()> {
+    if metadata.token_uri.is_some() {
+        return Err(StdError::generic_err(
+            "token_uri cannot be used with nft authorization",
+        ));
+    } else if metadata.extension.is_some().not() {
+        return Err(StdError::generic_err(
+            "the metadata does not cointain token_uri nor extension",
         ));
     }
     Ok(())
