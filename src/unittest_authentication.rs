@@ -415,7 +415,6 @@ mod tests {
 
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
         let token1: Token = json_load(&info_store, &token_key1).unwrap();
-        println!("{:?}", token1);
 
         // Test key regeneration (by admin)
         let regenerate_keys_msg = HandleMsg::GenerateAuthenticationKeys {
@@ -476,5 +475,10 @@ mod tests {
             Err(_e) => {panic!("Key regeneration by owner failed.")}
         }
 
+    }
+
+    #[test]
+    fn test_transfer_key_regen() {
+        
     }
 }

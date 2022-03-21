@@ -1033,6 +1033,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         // test token does not exist when supply is private
         let handle_msg = HandleMsg::SetMetadata {
             token_id: "SNIP20".to_string(),
@@ -1190,6 +1211,7 @@ mod tests {
                 name: Some("New Name Pub".to_string()),
                 description: Some("Minter changed the public metadata".to_string()),
                 image: Some("new uri pub".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
                 ..Extension::default()
             }),
         });
@@ -1199,6 +1221,7 @@ mod tests {
                 name: Some("New Name Priv".to_string()),
                 description: Some("Minter changed the private metadata".to_string()),
                 image: Some("new uri priv".to_string()),
+                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
                 ..Extension::default()
             }),
         });
@@ -1280,6 +1303,7 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: None,
                 image: Some("uri".to_string()),
+                auth_key: Some([131, 16, 117, 75, 87, 73, 231, 46, 36, 52, 48, 13, 157, 95, 42, 192, 244, 151, 215, 53, 192, 121, 221, 233, 26, 133, 178, 55, 196, 40, 228, 120]),
                 ..Extension::default()
             }),
         });
@@ -1288,7 +1312,7 @@ mod tests {
             entropy: None,
             owner: Some(HumanAddr("alice".to_string())),
             public_metadata: pub_expect.clone(),
-            private_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -1302,12 +1326,13 @@ mod tests {
                 name: Some("New Name".to_string()),
                 description: Some("Owner changed the metadata".to_string()),
                 image: Some("new uri".to_string()),
+                auth_key: Some([112, 114, 227, 184, 220, 231, 1, 166, 16, 50, 142, 97, 197, 41, 233, 74, 62, 45, 132, 154, 142, 166, 161, 38, 211, 173, 184, 78, 238, 106, 109, 92]),
                 ..Extension::default()
             }),
         });
         let handle_msg = HandleMsg::SetMetadata {
             token_id: "MyNFT".to_string(),
-            public_metadata: None,
+            public_metadata: pub_expect.clone(),
             private_metadata: priv_expect.clone(),
             padding: None,
         };
@@ -1621,6 +1646,7 @@ mod tests {
                 name: Some("My1".to_string()),
                 description: Some("Public 1".to_string()),
                 image: Some("URI 1".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
                 ..Extension::default()
             }),
         });
@@ -1643,6 +1669,7 @@ mod tests {
                 name: Some("My2".to_string()),
                 description: Some("Public 2".to_string()),
                 image: Some("URI 2".to_string()),
+                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
                 ..Extension::default()
             }),
         });
@@ -1665,6 +1692,7 @@ mod tests {
                 name: Some("My3".to_string()),
                 description: Some("Public 3".to_string()),
                 image: Some("URI 3".to_string()),
+                auth_key: Some([200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16, 176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103]),
                 ..Extension::default()
             }),
         });
@@ -1837,9 +1865,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
         assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let bob_tok_perm = token
             .permissions
@@ -1893,9 +1918,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
         assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let bob_tok_perm = token
             .permissions
@@ -1948,9 +1970,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft2_key).unwrap();
         assert_eq!(pub_meta, pub2.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft2_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let bob_tok_perm = token
             .permissions
@@ -2113,9 +2132,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft2_key).unwrap();
         assert_eq!(pub_meta, pub2.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft2_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         assert!(token
             .permissions
@@ -2225,9 +2241,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
         assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
         // confirm NFT2 permission for bob and charlie
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
         let token: Token = json_load(&info_store, &nft2_key).unwrap();
@@ -2262,9 +2275,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let bob_tok_perm = token
             .permissions
@@ -2365,9 +2375,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
         assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
         // confirm NFT2 permission removed bob but left and charlie
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
         let token: Token = json_load(&info_store, &nft2_key).unwrap();
@@ -2396,9 +2403,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 1);
         let bob_tok_perm = token
             .permissions
@@ -2478,12 +2482,9 @@ mod tests {
         let token: Token = json_load(&info_store, &nft4_key).unwrap();
         assert_eq!(token.owner, alice_raw);
         assert!(token.unwrapped);
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Metadata = load(&pub_store, &nft4_key).unwrap();
-        assert_eq!(pub_meta, pub4.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft4_key).unwrap();
-        assert!(priv_meta.is_none());
+        //let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        //let pub_meta: Metadata = load(&pub_store, &nft4_key).unwrap();
+        //assert_eq!(pub_meta, pub4.clone().unwrap());
         assert!(token.permissions.is_empty());
         // confirm edmund did not get added to AuthList
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
@@ -2601,9 +2602,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 2);
         let bob_tok_perm = token
             .permissions
@@ -2711,9 +2709,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 2);
         let bob_tok_perm = token
             .permissions
@@ -2820,12 +2815,9 @@ mod tests {
         let token: Token = json_load(&info_store, &nft4_key).unwrap();
         assert_eq!(token.owner, alice_raw);
         assert!(token.unwrapped);
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Metadata = load(&pub_store, &nft4_key).unwrap();
-        assert_eq!(pub_meta, pub4.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
+        //let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        //let pub_meta: Metadata = load(&pub_store, &nft4_key).unwrap();
+        //assert_eq!(pub_meta, pub4.clone().unwrap());
         assert_eq!(token.permissions.len(), 2);
         assert!(token
             .permissions
@@ -2965,9 +2957,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft1_key).unwrap();
         assert_eq!(pub_meta, pub1.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft1_key).unwrap();
-        assert!(priv_meta.is_none());
         // confirm NFT2 permission
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
         let token: Token = json_load(&info_store, &nft2_key).unwrap();
@@ -3014,9 +3003,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert_eq!(token.permissions.len(), 2);
         assert!(token
             .permissions
@@ -3492,9 +3478,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert!(token.permissions.is_empty());
         // confirm NFT4 permissions are empty
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
@@ -3536,9 +3519,6 @@ mod tests {
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &nft3_key).unwrap();
         assert_eq!(pub_meta, pub3.clone().unwrap());
-        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-        let priv_meta: Option<Metadata> = may_load(&priv_store, &nft3_key).unwrap();
-        assert!(priv_meta.is_none());
         assert!(token.permissions.is_empty());
         // confirm NFT4 permissions are empty
         let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
@@ -4467,7 +4447,6 @@ mod tests {
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
         assert_eq!(priv_meta, priv_expect.clone().unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         // confirm AuthList doesn not contain charlie
         let auth_store = ReadonlyPrefixedStorage::new(PREFIX_AUTHLIST, &deps.storage);
         let auth_list: Option<Vec<AuthList>> = may_load(&auth_store, alice_key).unwrap();
@@ -5021,6 +5000,7 @@ mod tests {
                 name: Some("MyNFT3".to_string()),
                 description: Some("privmetadata3".to_string()),
                 image: Some("privuri3".to_string()),
+                auth_key: Some([176, 111, 11, 80, 249, 177, 234, 33, 35, 227, 191, 85, 240, 45, 238, 236, 93, 85, 38, 203, 215, 164, 55, 170, 155, 60, 58, 162, 209, 229, 85, 80]),
                 ..Extension::default()
             }),
         });
@@ -5030,6 +5010,7 @@ mod tests {
                 name: Some("MyNFT3".to_string()),
                 description: Some("pubmetadata3".to_string()),
                 image: Some("puburi3".to_string()),
+                auth_key: Some([200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16, 176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103]),
                 ..Extension::default()
             }),
         });
@@ -5200,11 +5181,33 @@ mod tests {
             "Init failed: {}",
             init_result.err().unwrap()
         );
+
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5256,8 +5259,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5270,8 +5273,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5314,8 +5317,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT4".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5327,8 +5330,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT5".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5340,8 +5343,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT6".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5353,8 +5356,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT7".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5366,8 +5369,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT8".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5518,8 +5521,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5532,8 +5535,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5558,8 +5561,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT4".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5571,8 +5574,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT5".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5584,8 +5587,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT6".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5597,8 +5600,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT7".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5610,8 +5613,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT8".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5757,8 +5760,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5771,8 +5774,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: Some(false),
@@ -5797,8 +5800,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT4".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5810,8 +5813,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT5".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5823,8 +5826,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT6".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -5836,8 +5839,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT7".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: Some(false),
@@ -5849,8 +5852,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT8".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -6244,6 +6247,7 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
+                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
                 ..Extension::default()
             }),
         });
@@ -6253,6 +6257,7 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
                 ..Extension::default()
             }),
         });
@@ -6715,6 +6720,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
             entropy: None,
@@ -6728,7 +6754,7 @@ mod tests {
                     ..Extension::default()
                 }),
             }),
-            public_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -6823,8 +6849,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT1".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -6833,8 +6859,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT2".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -6843,8 +6869,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT3".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -6853,8 +6879,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT4".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -6863,8 +6889,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT5".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -6873,8 +6899,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT6".to_string()),
                     owner: Some(HumanAddr("charlie".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7043,8 +7069,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7057,8 +7083,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7070,8 +7096,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT3".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7083,8 +7109,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT4".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7096,8 +7122,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT5".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7109,8 +7135,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT6".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -7431,8 +7457,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT1".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7441,8 +7467,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT2".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7451,8 +7477,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT3".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7461,8 +7487,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT4".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7471,8 +7497,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT5".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -7481,8 +7507,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT6".to_string()),
                     owner: Some(HumanAddr("charlie".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8244,6 +8270,27 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_extension = Extension {
+            image: None,
+            image_data: None,
+            external_url: None,
+            description: None,
+            name: None,
+            attributes: None,
+            background_color: None,
+            animation_url: None,
+            youtube_url: None,
+            media: None,
+            protected_attributes: None,
+            token_subtype: None,
+            auth_key:  None,
+        };
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(empty_extension),
+        };
+
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("MyNFT".to_string()),
             entropy: None,
@@ -8257,7 +8304,7 @@ mod tests {
                     ..Extension::default()
                 }),
             }),
-            public_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8354,8 +8401,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8368,8 +8415,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT2".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8381,8 +8428,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT3".to_string()),
             owner: Some(HumanAddr("alice".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8394,8 +8441,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT4".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8407,8 +8454,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT5".to_string()),
             owner: Some(HumanAddr("bob".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8420,8 +8467,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT6".to_string()),
             owner: Some(HumanAddr("charlie".to_string())),
-            private_metadata: None,
-            public_metadata: None,
+            private_metadata: Some(empty_metadata.clone()),
+            public_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
@@ -8839,8 +8886,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT1".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8849,8 +8896,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT2".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8859,8 +8906,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT3".to_string()),
                     owner: Some(HumanAddr("alice".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8869,8 +8916,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT4".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8879,8 +8926,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT5".to_string()),
                     owner: Some(HumanAddr("bob".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
@@ -8889,8 +8936,8 @@ mod tests {
                 Mint {
                     token_id: Some("NFT6".to_string()),
                     owner: Some(HumanAddr("charlie".to_string())),
-                    private_metadata: None,
-                    public_metadata: None,
+                    private_metadata: Some(empty_metadata.clone()),
+                    public_metadata: Some(empty_metadata.clone()),
                     royalty_info: None,
                     serial_number: None,
                     transferable: None,
