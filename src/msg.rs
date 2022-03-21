@@ -176,6 +176,13 @@ pub enum HandleMsg {
         /// optional message length padding
         padding: Option<String>,
     },
+    /// Regenerate the public and private keys used for authentication. This can be called by either
+    /// the token owner, a valid minter (if they have been given the autherization to modify metadata)
+    /// or the admin.
+    GenerateAuthenticationKeys {
+        token_id: String,
+        entropy: Option<String>,
+    },
     /// set royalty information.  If no token ID is provided, this royalty info will become the default
     /// RoyaltyInfo for any new tokens minted on the contract.  If a token ID is provided, this can only
     /// be called by the token creator and only when the creator is the current owner.  Royalties can not
@@ -507,6 +514,9 @@ pub enum HandleAnswer {
         last_minted: String,
     },
     SetMetadata {
+        status: ResponseStatus,
+    },
+    GenerateAuthenticationKeys {
         status: ResponseStatus,
     },
     SetRoyaltyInfo {

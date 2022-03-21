@@ -6,7 +6,7 @@ use cosmwasm_std::{CanonicalAddr, StdResult, StdError};
 use crate::state::Permission;
 
 /// token
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Token {
     /// owner
     pub owner: CanonicalAddr,

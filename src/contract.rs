@@ -14,7 +14,7 @@ use secret_toolkit::{
     utils::{pad_handle_result, pad_query_result},
 };
 
-use crate::{expiration::Expiration, token::Extension};
+use crate::{expiration::Expiration};
 use crate::inventory::{Inventory, InventoryIter};
 use crate::mint_run::{SerialNumber, StoredMintRunInfo};
 use crate::msg::{
@@ -44,7 +44,7 @@ pub const ID_BLOCK_SIZE: u32 = 64;
 
 // For randomization
 use rand_chacha::ChaChaRng;
-use rand::{RngCore, SeedableRng, AsByteSliceMut};
+use rand::{SeedableRng};
 use crate::rand::Prng;
 //use rand_core::OsRng;
 use x25519_dalek::{StaticSecret, PublicKey};
@@ -149,7 +149,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
     let mut config: Config = load(&deps.storage, CONFIG_KEY)?;
 
     let response = match msg {
-        HandleMsg::MintNft {
+        HandleMsg::MintNft { //solved
             token_id,
             owner,
             public_metadata,
@@ -175,7 +175,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             memo,
             entropy,
         ),
-        HandleMsg::BatchMintNft { mints, entropy, .. } => batch_mint(
+        HandleMsg::BatchMintNft { mints, entropy, .. } => batch_mint( //solved
             deps,
             env,
             &mut config,
@@ -183,7 +183,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             mints,
             entropy
         ),
-        HandleMsg::MintNftClones {
+        HandleMsg::MintNftClones { //solved
             mint_run_id,
             quantity,
             owner,
@@ -207,7 +207,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             memo,
             entropy,
         ),
-        HandleMsg::SetMetadata {
+        HandleMsg::SetMetadata { //solved
             token_id,
             public_metadata,
             private_metadata,
@@ -221,7 +221,17 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             public_metadata,
             private_metadata,
         ),
-        HandleMsg::SetRoyaltyInfo {
+        HandleMsg::GenerateAuthenticationKeys { //solved
+            token_id,
+            entropy,
+        } => metadata_generate_keypair(
+            deps,
+            env,
+            &config,
+            &token_id,
+            entropy,
+        ),
+        HandleMsg::SetRoyaltyInfo { //noneed
             token_id,
             royalty_info,
             ..
@@ -233,23 +243,23 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             token_id.as_deref(),
             royalty_info.as_ref(),
         ),
-        HandleMsg::Reveal { token_id, .. } => reveal(
+        HandleMsg::Reveal { token_id, .. } => reveal( //noneed
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &token_id,
         ),
-        HandleMsg::MakeOwnershipPrivate { .. } => {
+        HandleMsg::MakeOwnershipPrivate { .. } => { //noneed
             make_owner_private(deps, env, &config, ContractStatus::StopTransactions.to_u8())
         }
-        HandleMsg::SetGlobalApproval {
+        HandleMsg::SetGlobalApproval { //noneed
             token_id,
             view_owner,
             view_private_metadata,
             expires,
             ..
-        } => set_global_approval(
+        } => set_global_approval( //noneed
             deps,
             env,
             &config,
@@ -259,7 +269,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             view_private_metadata,
             expires,
         ),
-        HandleMsg::SetWhitelistedApproval {
+        HandleMsg::SetWhitelistedApproval { //noneed
             address,
             token_id,
             view_owner,
@@ -280,7 +290,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             SetAppResp::SetWhitelistedApproval,
         ),
-        HandleMsg::Approve {
+        HandleMsg::Approve { //noneed
             spender,
             token_id,
             expires,
@@ -295,7 +305,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             true,
         ),
-        HandleMsg::Revoke {
+        HandleMsg::Revoke { //noneed
             spender, token_id, ..
         } => approve_revoke(
             deps,
@@ -307,7 +317,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             None,
             false,
         ),
-        HandleMsg::ApproveAll {
+        HandleMsg::ApproveAll { //noneed
             operator, expires, ..
         } => set_whitelisted_approval(
             deps,
@@ -322,7 +332,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             SetAppResp::ApproveAll,
         ),
-        HandleMsg::RevokeAll { operator, .. } => set_whitelisted_approval(
+        HandleMsg::RevokeAll { operator, .. } => set_whitelisted_approval( //noneed
             deps,
             env,
             &config,
@@ -335,7 +345,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             None,
             SetAppResp::RevokeAll,
         ),
-        HandleMsg::TransferNft {
+        HandleMsg::TransferNft { //solved
             recipient,
             token_id,
             memo,
@@ -349,14 +359,14 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             token_id,
             memo,
         ),
-        HandleMsg::BatchTransferNft { transfers, .. } => batch_transfer_nft(
+        HandleMsg::BatchTransferNft { transfers, .. } => batch_transfer_nft( //solved
             deps,
             env,
             &mut config,
             ContractStatus::Normal.to_u8(),
             transfers,
         ),
-        HandleMsg::SendNft {
+        HandleMsg::SendNft { 
             contract,
             receiver_info,
             token_id,
@@ -374,14 +384,14 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             msg,
             memo,
         ),
-        HandleMsg::BatchSendNft { sends, .. } => batch_send_nft(
+        HandleMsg::BatchSendNft { sends, .. } => batch_send_nft( 
             deps,
             env,
             &mut config,
             ContractStatus::Normal.to_u8(),
             sends,
         ),
-        HandleMsg::RegisterReceiveNft {
+        HandleMsg::RegisterReceiveNft { 
             code_hash,
             also_implements_batch_receive_nft,
             ..
@@ -393,7 +403,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             code_hash,
             also_implements_batch_receive_nft,
         ),
-        HandleMsg::BurnNft { token_id, memo, .. } => burn_nft(
+        HandleMsg::BurnNft { token_id, memo, .. } => burn_nft( 
             deps,
             env,
             &mut config,
@@ -401,63 +411,156 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             token_id,
             memo,
         ),
-        HandleMsg::BatchBurnNft { burns, .. } => batch_burn_nft(
+        HandleMsg::BatchBurnNft { burns, .. } => batch_burn_nft( 
             deps,
             env,
             &mut config,
             ContractStatus::Normal.to_u8(),
             burns,
         ),
-        HandleMsg::CreateViewingKey { entropy, .. } => create_key(
+        HandleMsg::CreateViewingKey { entropy, .. } => create_key( 
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &entropy,
         ),
-        HandleMsg::SetViewingKey { key, .. } => set_key(
+        HandleMsg::SetViewingKey { key, .. } => set_key( 
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             key,
         ),
-        HandleMsg::AddMinters { minters, .. } => add_minters(
+        HandleMsg::AddMinters { minters, .. } => add_minters( 
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &minters,
         ),
-        HandleMsg::RemoveMinters { minters, .. } => remove_minters(
+        HandleMsg::RemoveMinters { minters, .. } => remove_minters( 
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &minters,
         ),
-        HandleMsg::SetMinters { minters, .. } => set_minters(
+        HandleMsg::SetMinters { minters, .. } => set_minters( 
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &minters,
         ),
-        HandleMsg::ChangeAdmin { address, .. } => change_admin(
+        HandleMsg::ChangeAdmin { address, .. } => change_admin( 
             deps,
             env,
             &mut config,
             ContractStatus::StopTransactions.to_u8(),
             &address,
         ),
-        HandleMsg::SetContractStatus { level, .. } => {
+        HandleMsg::SetContractStatus { level, .. } => { 
             set_contract_status(deps, env, &mut config, level)
         }
-        HandleMsg::RevokePermit { permit_name, .. } => {
+        HandleMsg::RevokePermit { permit_name, .. } => { 
             revoke_permit(&mut deps.storage, &env.message.sender, &permit_name)
         }
     };
     pad_handle_result(response, BLOCK_SIZE)
+}
+
+/// Returns HandleResult
+///
+/// Resets the authentication keypair of the nft if the sender has the power. And generates a new prng seed.
+///
+/// # Arguments
+///
+/// * `deps` - mutable reference to Extern containing all the contract's external dependencies
+/// * `env` - Env of contract's environment
+/// * `config` - a reference to the Config
+/// * `token_id` - token id String slice of token whose metadata should be updated
+/// * `entropy` - the optional string sent by user for additional randomness
+pub fn metadata_generate_keypair<S: Storage, A: Api, Q: Querier>(
+    deps: &mut Extern<S, A, Q>,
+    env: Env,
+    config: &Config,
+    token_id: &String,
+    entropy: Option<String>,
+) -> HandleResult {
+    let custom_err = format!("Not authorized to update metadata of token {}", token_id);
+    // if token supply is private, don't leak that the token id does not exist
+    // instead just say they are not authorized for that token
+    let opt_err = if config.token_supply_is_public {
+        None
+    } else {
+        Some(&*custom_err)
+    };
+    let (token, idx) = get_token(&deps.storage, token_id, opt_err)?;
+    let sender_raw = deps.api.canonical_address(&env.message.sender)?;
+
+    // check autherization of the sender
+    if !( sender_raw == token.owner || sender_raw == config.admin ) {
+        let minters: Vec<CanonicalAddr> =
+            may_load(&deps.storage, MINTERS_KEY)?.unwrap_or_else(Vec::new);
+        if !config.minter_may_update_metadata || !minters.contains(&sender_raw) {
+            return Err(StdError::generic_err(custom_err));
+        }
+    }
+
+    metadata_generate_keypair_impl(deps, &env, entropy, idx)
+}
+
+/// Returns HandleResult
+///
+/// Resets the authentication keypair of the nft. And generates a new prng seed.
+///
+/// # Arguments
+///
+/// * `deps` - mutable reference to Extern containing all the contract's external dependencies
+/// * `env` - Env of contract's environment
+/// * `entropy` - the optional string sent by user for additional randomness
+/// * `idx` - index of the token whose keypair should be updated
+pub fn metadata_generate_keypair_impl<S: Storage, A: Api, Q: Querier>(
+    deps: &mut Extern<S, A, Q>,
+    env: &Env,
+    entropy: Option<String>,
+    idx: u32,
+) -> HandleResult {
+    // generate the new public/private key pair
+    let prng_seed: Vec<u8> = load(&deps.storage, PRNG_SEED_KEY).unwrap();
+    let (pubkey, scrtkey, new_prng_seed) = generate_keypair(env, prng_seed, entropy);
+    save(&mut deps.storage, PRNG_SEED_KEY, &new_prng_seed).unwrap();
+
+    // update private metadata with the private key.
+    let mut priv_meta_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
+    let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_store, &idx.to_le_bytes())?;
+
+    match maybe_priv_meta {
+        None => {return Err(StdError::generic_err("This NFT does not have a private metadata associated to it."))},
+        Some(priv_meta) => {
+            let new_meta =  priv_meta.add_auth_key(&scrtkey.to_bytes()).unwrap();
+            save(&mut priv_meta_store, &idx.to_le_bytes(), &new_meta)?;
+        },
+    }
+
+    // update public metadata with the public key
+    let mut pub_meta_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
+    let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_store, &idx.to_le_bytes())?;
+
+    match maybe_pub_meta {
+        None => {return Err(StdError::generic_err("This NFT does not have a private metadata associated to it."))},
+        Some(pub_meta) => {
+            let new_meta =  pub_meta.add_auth_key(&pubkey.to_bytes()).unwrap();
+            save(&mut pub_meta_store, &idx.to_le_bytes(), &new_meta)?;
+        },
+    }
+
+    Ok(HandleResponse{
+        messages: vec![],
+        log: vec![],
+        data: Some(to_binary(&HandleAnswer::GenerateAuthenticationKeys { status: Success })?),
+    })
 }
 
 /// Returns (PublicKey, StaticSecret, Vec<u8>)
@@ -492,7 +595,7 @@ pub fn generate_keypair(
 
 /// Returns [u8;32]
 /// 
-/// generates new entropy (to be used in keypair generation), does not save it to the contract.
+/// generates new entropy from block data, does not save it to the contract.
 /// 
 /// # Arguments
 /// 
@@ -531,6 +634,7 @@ pub fn new_entropy(env: &Env, seed: &[u8], entropy: &[u8])-> [u8;32] {
 /// * `royalty_info` - optional royalties information for this token
 /// * `transferable` - optionally true if this token is transferable
 /// * `memo` - optional memo for the mint tx
+/// * `entropy` - optional string for additional randomness for authetication keys.
 #[allow(clippy::too_many_arguments)]
 pub fn mint<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
@@ -588,6 +692,7 @@ pub fn mint<S: Storage, A: Api, Q: Querier>(
 /// * `config` - a mutable reference to the Config
 /// * `priority` - u8 representation of highest ContractStatus level this action is permitted
 /// * `mints` - the list of mints to perform
+/// * `entropy` - optional string for additional randomness for authetication keys.
 pub fn batch_mint<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
@@ -632,6 +737,7 @@ pub fn batch_mint<S: Storage, A: Api, Q: Querier>(
 /// * `private_metadata` - optional private metadata viewable only by owner and whitelist
 /// * `royalty_info` - optional royalties information for these clones
 /// * `memo` - optional memo for the mint txs
+/// * `entropy` - optional string for additional randomness for authetication keys.
 #[allow(clippy::too_many_arguments)]
 pub fn mint_clones<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
@@ -756,11 +862,28 @@ pub fn set_metadata<S: Storage, A: Api, Q: Querier>(
             return Err(StdError::generic_err(custom_err));
         }
     }
+    let mut regenerate_keys = true;
     if let Some(public) = public_metadata {
         set_metadata_impl(&mut deps.storage, &token, idx, PREFIX_PUB_META, &public)?;
+        if public.extension.is_none() {
+            regenerate_keys = false;
+        }
+    } else {
+        regenerate_keys = false;
     }
     if let Some(private) = private_metadata {
         set_metadata_impl(&mut deps.storage, &token, idx, PREFIX_PRIV_META, &private)?;
+        if private.extension.is_none() {
+            regenerate_keys  = false;
+        }
+    } else {
+        regenerate_keys = false;
+    }
+    if regenerate_keys {
+        let regenerate_keys = metadata_generate_keypair_impl(deps, &env, None, idx);
+        if let Err(_e) = regenerate_keys {
+            return Err(StdError::generic_err("an authentication keypair for these metadata could not be generated."));
+        }
     }
     Ok(HandleResponse {
         messages: vec![],
@@ -1799,15 +1922,15 @@ pub fn query<S: Storage, A: Api, Q: Querier>(deps: &Extern<S, A, Q>, msg: QueryM
         QueryMsg::RoyaltyInfo { token_id, viewer } => {
             query_royalty(deps, token_id.as_deref(), viewer, None)
         }
-        QueryMsg::ContractConfig {} => query_config(&deps.storage),
+        QueryMsg::ContractConfig {} => query_config(&deps.storage), 
         QueryMsg::Minters {} => query_minters(deps),
         QueryMsg::NumTokens { viewer } => query_num_tokens(deps, viewer, None),
-        QueryMsg::AllTokens {
+        QueryMsg::AllTokens { //noneed
             viewer,
             start_after,
             limit,
         } => query_all_tokens(deps, viewer, start_after, limit, None),
-        QueryMsg::OwnerOf {
+        QueryMsg::OwnerOf { //noneed
             token_id,
             viewer,
             include_expired,
@@ -4340,7 +4463,7 @@ fn update_owner_inventory<S: Storage>(
 /// # Arguments
 ///
 /// * `deps` - a mutable reference to Extern containing all the contract's external dependencies
-/// * `block` - a reference to the current BlockInfo
+/// * `env` - a reference to the Env of the contract's environment
 /// * `config` - a mutable reference to the Config
 /// * `sender` - a reference to the message sender address
 /// * `token_id` - token id String of token being transferred
@@ -4351,7 +4474,7 @@ fn update_owner_inventory<S: Storage>(
 #[allow(clippy::too_many_arguments)]
 fn transfer_impl<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
-    block: &BlockInfo,
+    env: &Env,
     config: &mut Config,
     sender: &CanonicalAddr,
     token_id: String,
@@ -4360,6 +4483,7 @@ fn transfer_impl<S: Storage, A: Api, Q: Querier>(
     inv_updates: &mut Vec<InventoryUpdate>,
     memo: Option<String>,
 ) -> StdResult<CanonicalAddr> {
+    let block = &env.block;
     let (mut token, idx) = get_token_if_permitted(
         deps,
         block,
@@ -4421,6 +4545,20 @@ fn transfer_impl<S: Storage, A: Api, Q: Querier>(
     } else {
         Some(sender.clone())
     };
+    // regenerate authentication key pairs if the metadatas' use extension.
+    let priv_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
+    let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_storage, &idx.to_le_bytes())?.unwrap();
+    let pub_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+    let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_storage, &idx.to_le_bytes())?.unwrap();
+
+    if let (Some(priv_meta), Some(pub_meta)) = (maybe_priv_meta, maybe_pub_meta) {
+        enforce_metadata_is_extension(&priv_meta)?;
+        enforce_metadata_is_extension(&pub_meta)?;
+        let regenerate_keys = metadata_generate_keypair_impl(deps, env, None, idx);
+        if let Err(_e) = regenerate_keys {
+            return Err(StdError::generic_err("an authentication keypair for this NFT could not be generated."));
+        }
+    }
     // store the tx
     store_transfer(
         &mut deps.storage,
@@ -4473,7 +4611,7 @@ fn send_list<S: Storage, A: Api, Q: Querier>(
             for token_id in xfer.token_ids.into_iter() {
                 let _o = transfer_impl(
                     deps,
-                    &env.block,
+                    env,
                     config,
                     sender,
                     token_id,
@@ -4492,7 +4630,7 @@ fn send_list<S: Storage, A: Api, Q: Querier>(
             for token_id in send.token_ids.into_iter() {
                 let owner_raw = transfer_impl(
                     deps,
-                    &env.block,
+                    env,
                     config,
                     sender,
                     token_id.clone(),
@@ -4643,13 +4781,14 @@ fn burn_list<S: Storage, A: Api, Q: Querier>(
 /// * `config` - a mutable reference to the Config
 /// * `sender_raw` - a reference to the message sender address
 /// * `mints` - list of mints to perform
+/// * `entropy` - optional string for additional randomness for authetication keys.
 fn mint_list<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: &Env,
     config: &mut Config,
     sender_raw: &CanonicalAddr,
     mints: Vec<Mint>,
-    user_entropy: Option<String>,
+    entropy: Option<String>,
 ) -> StdResult<Vec<String>> {
     let mut inventories: Vec<Inventory> = Vec::new();
     let mut minted: Vec<String> = Vec::new();
@@ -4713,7 +4852,7 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
         //
         // save the metadata with keypair generation
 
-        let (pubkey, scrtkey, new_prng_seed) = generate_keypair(env, prng_seed, user_entropy.clone());
+        let (pubkey, scrtkey, new_prng_seed) = generate_keypair(env, prng_seed, entropy.clone());
         prng_seed  = new_prng_seed;
 
         let maybe_priv_meta = mint.private_metadata;
