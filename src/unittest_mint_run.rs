@@ -7,7 +7,6 @@ mod tests {
     use cosmwasm_std::testing::*;
     use cosmwasm_std::{from_binary, Extern, HumanAddr, InitResponse, StdError, StdResult};
     use std::any::Any;
-    use std::ptr::NonNull;
 
     // Helper functions
 
@@ -83,25 +82,9 @@ mod tests {
         let error = extract_error_msg(handle_result);
         assert!(error.contains("Quantity can not be zero"));
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test no mint_run_id

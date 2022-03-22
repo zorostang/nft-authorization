@@ -214,25 +214,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let alice = HumanAddr("alice".to_string());
@@ -429,25 +413,9 @@ mod tests {
     // test minting
     #[test]
     fn test_mint() {
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let (init_result, mut deps) = init_helper_default();
@@ -1033,25 +1001,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is private
@@ -1356,25 +1308,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is public
@@ -1583,25 +1519,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is public
@@ -3541,25 +3461,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is public
@@ -4071,25 +3975,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is public
@@ -5182,25 +5070,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -6251,6 +6123,26 @@ mod tests {
                 ..Extension::default()
             }),
         });
+        let priv1_expect_after_send = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("privmetadata".to_string()),
+                image: Some("privuri".to_string()),
+                auth_key: Some([208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156, 236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87]),
+                ..Extension::default()
+            }),
+        });
+        let priv1_expect_after_send2 = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("privmetadata".to_string()),
+                image: Some("privuri".to_string()),
+                auth_key: Some([0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73, 132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109]),
+                ..Extension::default()
+            }),
+        });
         let pub1 = Some(Metadata {
             token_uri: None,
             extension: Some(Extension {
@@ -6258,6 +6150,26 @@ mod tests {
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
                 auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                ..Extension::default()
+            }),
+        });
+        let pub1_expect_after_send = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("pubmetadata".to_string()),
+                image: Some("puburi".to_string()),
+                auth_key: Some([8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195, 117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18]),
+                ..Extension::default()
+            }),
+        });
+        let pub1_expect_after_send2 = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("pubmetadata".to_string()),
+                image: Some("puburi".to_string()),
+                auth_key: Some([113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183, 180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79]),
                 ..Extension::default()
             }),
         });
@@ -6531,10 +6443,10 @@ mod tests {
         // confirm the metadata is intact
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
-        assert_eq!(priv_meta, priv1.clone().unwrap());
+        assert_eq!(priv_meta, priv1_expect_after_send.clone().unwrap());
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &tok_key).unwrap();
-        assert_eq!(pub_meta, pub1.clone().unwrap());
+        assert_eq!(pub_meta, pub1_expect_after_send.clone().unwrap());
         // confirm the tx was logged to all involved parties
         let (txs, total) = get_txs(&deps.api, &deps.storage, &alice_raw, 0, 1).unwrap();
         assert_eq!(total, 2);
@@ -6620,10 +6532,10 @@ mod tests {
         // confirm the metadata is intact
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
-        assert_eq!(priv_meta, priv1.clone().unwrap());
+        assert_eq!(priv_meta, priv1_expect_after_send2.clone().unwrap());
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &tok_key).unwrap();
-        assert_eq!(pub_meta, pub1.clone().unwrap());
+        assert_eq!(pub_meta, pub1_expect_after_send2.clone().unwrap());
         // confirm the tx was logged to all involved parties
         let (txs, total) = get_txs(&deps.api, &deps.storage, &charlie_raw, 0, 10).unwrap();
         assert_eq!(total, 1);
@@ -6720,25 +6632,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -7658,25 +7554,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -7773,8 +7653,28 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
+                ..Extension::default()
+            }),
+        });
+        let priv1_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("privmetadata".to_string()),
+                image: Some("privuri".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156, 236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87]),
+                ..Extension::default()
+            }),
+        });
+        let priv1_expect_after_send = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("privmetadata".to_string()),
+                image: Some("privuri".to_string()),
+                // auth key added to pass tests
+                auth_key: Some([0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73, 132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109]),
                 ..Extension::default()
             }),
         });
@@ -7784,8 +7684,28 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
+                ..Extension::default()
+            }),
+        });
+        let pub1_expect = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("pubmetadata".to_string()),
+                image: Some("puburi".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195, 117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18]),
+                ..Extension::default()
+            }),
+        });
+        let pub1_expect_after_send = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: Some("pubmetadata".to_string()),
+                image: Some("puburi".to_string()),
+                // auth key added to pass tests
+                auth_key: Some([113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183, 180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79]),
                 ..Extension::default()
             }),
         });
@@ -8035,10 +7955,10 @@ mod tests {
         // confirm the metadata is intact
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
-        assert_eq!(priv_meta, priv1.clone().unwrap());
+        assert_eq!(priv_meta, priv1_expect.clone().unwrap());
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &tok_key).unwrap();
-        assert_eq!(pub_meta, pub1.clone().unwrap());
+        assert_eq!(pub_meta, pub1_expect.clone().unwrap());
         // confirm the tx was logged to all involved parties
         let (txs, total) = get_txs(&deps.api, &deps.storage, &alice_raw, 0, 1).unwrap();
         assert_eq!(total, 2);
@@ -8148,10 +8068,10 @@ mod tests {
         // confirm the metadata is intact
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &tok_key).unwrap();
-        assert_eq!(priv_meta, priv1.clone().unwrap());
+        assert_eq!(priv_meta, priv1_expect_after_send.clone().unwrap());
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &tok_key).unwrap();
-        assert_eq!(pub_meta, pub1.clone().unwrap());
+        assert_eq!(pub_meta, pub1_expect_after_send.clone().unwrap());
         // confirm the tx was logged to all involved parties
         let (txs, total) = get_txs(&deps.api, &deps.storage, &charlie_raw, 0, 10).unwrap();
         assert_eq!(total, 1);
@@ -8270,25 +8190,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -9734,25 +9638,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -9976,25 +9864,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let handle_msg = HandleMsg::MintNft {
@@ -10308,25 +10180,9 @@ mod tests {
             init_result.err().unwrap()
         );
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         // test token does not exist when supply is public
@@ -10706,25 +10562,9 @@ mod tests {
     #[test]
     fn test_check_permission() {
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let (init_result, mut deps) =

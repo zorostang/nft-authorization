@@ -539,6 +539,7 @@ pub fn metadata_generate_keypair_impl<S: Storage, A: Api, Q: Querier>(
     match maybe_priv_meta {
         None => {return Err(StdError::generic_err("This NFT does not have a private metadata associated to it."))},
         Some(priv_meta) => {
+            enforce_metadata_is_extension(&priv_meta)?;
             let new_meta =  priv_meta.add_auth_key(&scrtkey.to_bytes()).unwrap();
             save(&mut priv_meta_store, &idx.to_le_bytes(), &new_meta)?;
         },
@@ -549,8 +550,9 @@ pub fn metadata_generate_keypair_impl<S: Storage, A: Api, Q: Querier>(
     let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_store, &idx.to_le_bytes())?;
 
     match maybe_pub_meta {
-        None => {return Err(StdError::generic_err("This NFT does not have a private metadata associated to it."))},
+        None => {return Err(StdError::generic_err("This NFT does not have a public metadata associated to it."))},
         Some(pub_meta) => {
+            enforce_metadata_is_extension(&pub_meta)?;
             let new_meta =  pub_meta.add_auth_key(&pubkey.to_bytes()).unwrap();
             save(&mut pub_meta_store, &idx.to_le_bytes(), &new_meta)?;
         },
@@ -4547,9 +4549,9 @@ fn transfer_impl<S: Storage, A: Api, Q: Querier>(
     };
     // regenerate authentication key pairs if the metadatas' use extension.
     let priv_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-    let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_storage, &idx.to_le_bytes())?.unwrap();
+    let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_storage, &idx.to_le_bytes())?;
     let pub_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-    let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_storage, &idx.to_le_bytes())?.unwrap();
+    let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_storage, &idx.to_le_bytes())?;
 
     if let (Some(priv_meta), Some(pub_meta)) = (maybe_priv_meta, maybe_pub_meta) {
         enforce_metadata_is_extension(&priv_meta)?;
@@ -4812,7 +4814,8 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
             StdError::generic_err("Attempting to mint more tokens than the implementation limit")
         })?;
         // map new token id to its index
-        save(&mut map2idx, id.as_bytes(), &config.mint_cnt)?;
+        let idx = config.mint_cnt;
+        save(&mut map2idx, id.as_bytes(), &idx)?;
         let recipient = if let Some(o) = mint.owner {
             deps.api.canonical_address(&o)?
         } else {

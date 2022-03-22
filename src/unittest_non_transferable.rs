@@ -348,12 +348,17 @@ mod tests {
         );
         assert_eq!(init_result.unwrap(), InitResponse::default());
 
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
+
         let mints = vec![
             Mint {
                 token_id: Some("TrySetRoys".to_string()),
                 owner: None,
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: Some(royalties.clone()),
                 transferable: Some(false),
                 serial_number: None,
@@ -362,8 +367,8 @@ mod tests {
             Mint {
                 token_id: Some("TryDefaultRoys".to_string()),
                 owner: None,
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -444,12 +449,17 @@ mod tests {
         let alice = HumanAddr("alice".to_string());
         let bob = HumanAddr("bob".to_string());
 
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
+
         let mints = vec![
             Mint {
                 token_id: Some("NFT1".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -458,8 +468,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT2".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -563,12 +573,17 @@ mod tests {
         let alice = HumanAddr("alice".to_string());
         let alice_raw = deps.api.canonical_address(&alice).unwrap();
 
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
+
         let mints = vec![
             Mint {
                 token_id: Some("NFT1".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -577,8 +592,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT2".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -587,8 +602,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT3".to_string()),
                 owner: Some(alice.clone()),
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -698,6 +713,17 @@ mod tests {
         };
         let alice = HumanAddr("alice".to_string());
 
+        let public_meta_expect = Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("Name1".to_string()),
+                description: Some("PubDesc1".to_string()),
+                image: Some("PubUri1".to_string()),
+                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                ..Extension::default()
+            }),
+        };
+
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(alice.clone()),
@@ -739,7 +765,7 @@ mod tests {
                 inventory_approvals,
             } => {
                 assert_eq!(owner, Some(alice.clone()));
-                assert_eq!(public_metadata, Some(public_meta.clone()));
+                assert_eq!(public_metadata, Some(public_meta_expect.clone()));
                 assert!(private_metadata.is_none());
                 assert_eq!(
                     display_private_metadata_error,
@@ -768,6 +794,11 @@ mod tests {
             "Init failed: {}",
             init_result.err().unwrap()
         );
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
 
         // test token not found when supply is public
         let query_msg = QueryMsg::IsTransferable {
@@ -812,8 +843,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT1".to_string()),
                 owner: None,
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: Some(false),
                 serial_number: None,
@@ -822,8 +853,8 @@ mod tests {
             Mint {
                 token_id: Some("NFT2".to_string()),
                 owner: None,
-                public_metadata: None,
-                private_metadata: None,
+                public_metadata: Some(empty_metadata.clone()),
+                private_metadata: Some(empty_metadata.clone()),
                 royalty_info: None,
                 transferable: None,
                 serial_number: None,
@@ -881,6 +912,11 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
+
         let alice = HumanAddr("alice".to_string());
         let bob = HumanAddr("bob".to_string());
 
@@ -901,8 +937,8 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),
             owner: Some(alice.clone()),
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: Some(false),

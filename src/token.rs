@@ -91,19 +91,8 @@ impl Extension {
     fn add_auth_key(&self, new_key: &[u8; 32]) -> Extension {
         let self_clone = self.clone();
         Extension {
-            image: self_clone.image,
-            image_data: self_clone.image_data,
-            external_url: self_clone.external_url,
-            description: self_clone.description,
-            name: self_clone.name,
-            attributes: self_clone.attributes,
-            background_color: self_clone.background_color,
-            animation_url: self_clone.animation_url,
-            youtube_url: self_clone.youtube_url,
-            media: self_clone.media,
-            protected_attributes: self_clone.protected_attributes,
-            token_subtype: self_clone.token_subtype,
             auth_key: Some(new_key.clone()),
+            ..self_clone
         }
     }
 }

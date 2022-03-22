@@ -1,13 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use crate::contract::{generate_keypair, init, query, new_entropy, handle, metadata_generate_keypair_impl};
-    use crate::msg::{HandleMsg, InitMsg, QueryAnswer, QueryMsg, Mint, HandleAnswer};
+    use crate::contract::{generate_keypair, init, handle};
+    use crate::msg::{HandleMsg, InitMsg, Mint, HandleAnswer};
     use crate::state::{may_load, PRNG_SEED_KEY, PREFIX_PUB_META, load, PREFIX_MAP_TO_INDEX, PREFIX_PRIV_META, PREFIX_MAP_TO_ID, PREFIX_INFOS, json_load};
     use crate::token::{Metadata, Extension, Token};
-    use cosmwasm_std::{testing::*, Api};
+    use cosmwasm_std::{testing::*, Api, to_binary, BlockInfo, MessageInfo};
     use cosmwasm_storage::ReadonlyPrefixedStorage;
     use crate::rand::sha_256;
-    use cosmwasm_std::{from_binary, Extern, HumanAddr, InitResponse, StdError, StdResult,  Env};
+    use cosmwasm_std::{from_binary, Extern, HumanAddr, InitResponse, StdResult,  Env};
     // Helper functions
 
     fn init_helper_default() -> (
@@ -159,25 +159,9 @@ mod tests {
 
         // test mint batch
 
-        let empty_extension = Extension {
-            image: None,
-            image_data: None,
-            external_url: None,
-            description: None,
-            name: None,
-            attributes: None,
-            background_color: None,
-            animation_url: None,
-            youtube_url: None,
-            media: None,
-            protected_attributes: None,
-            token_subtype: None,
-            auth_key:  None,
-        };
-
         let empty_metadata = Metadata {
             token_uri: None,
-            extension: Some(empty_extension),
+            extension: Some(Extension::default()),
         };
 
         let alice = HumanAddr("alice".to_string());
@@ -413,9 +397,6 @@ mod tests {
         let priv_meta1: Metadata = load(&priv_store.unwrap(), &token_key1).unwrap();
         assert_eq!(priv_meta1, priv_expect1.unwrap());
 
-        let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
-        let token1: Token = json_load(&info_store, &token_key1).unwrap();
-
         // Test key regeneration (by admin)
         let regenerate_keys_msg = HandleMsg::GenerateAuthenticationKeys {
             token_id: "MyNFT".to_string(),
@@ -449,8 +430,6 @@ mod tests {
             Err(_e) => {panic!("Key regeneration by admin failed.")}
         }
 
-        //let _whatever = metadata_generate_keypair_impl(&mut deps, env, None, index1);
-
         let map2idx = Some(ReadonlyPrefixedStorage::new(PREFIX_MAP_TO_INDEX, &deps.storage));
 
         let index1: u32 = load(&map2idx.unwrap(), "MyNFT".as_bytes()).unwrap();
@@ -478,7 +457,126 @@ mod tests {
     }
 
     #[test]
-    fn test_transfer_key_regen() {
-        
+    fn test_send() {
+        // test if the authentication keys are updated after the NFT is transferred and/or sent.
+        // the tests are not complete as I didn't test every send/transfer and batch transfer messages.
+        // but most of these unwritten tests overlap with unittest_handles anyway.
+        let (init_result, mut deps, _env) = init_helper_default();
+        assert!(
+            init_result.is_ok(),
+            "Init failed: {}",
+            init_result.err().unwrap()
+        );
+
+        let david_raw = deps
+        .api
+        .canonical_address(&HumanAddr("david".to_string()))
+        .unwrap();
+
+        let pub_meta = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFT".to_string()),
+                description: None,
+                image: Some("uri".to_string()),
+                ..Extension::default()
+            }),
+        });
+        let priv_meta = Some(Metadata {
+            token_uri: None,
+            extension: Some(Extension {
+                name: Some("MyNFTpriv".to_string()),
+                description: Some("Nifty".to_string()),
+                image: Some("privuri".to_string()),
+                ..Extension::default()
+            }),
+        });
+
+        let handle_msg = HandleMsg::MintNft {
+            token_id: Some("MyNFT".to_string()),
+            entropy: None,
+            owner: Some(HumanAddr("alice".to_string())),
+            public_metadata: pub_meta.clone(),
+            private_metadata: priv_meta.clone(),
+            royalty_info: None,
+            serial_number: None,
+            transferable: None,
+            memo: Some("Mint it baby!".to_string()),
+            padding: None,
+        };
+
+        let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
+
+        let map2idx = Some(ReadonlyPrefixedStorage::new(PREFIX_MAP_TO_INDEX, &deps.storage));
+
+        let index1: u32 = load(&map2idx.unwrap(), "MyNFT".as_bytes()).unwrap();
+        let token_key1 = index1.to_le_bytes();
+
+        //  record the metadata of the NFT before sending it.
+
+        let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
+        let token: Token = json_load(&info_store, &token_key1).unwrap();
+
+        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        let pub_meta: Metadata = may_load(&pub_store, &token_key1).unwrap().unwrap();
+        let pub_meta_old = pub_meta.clone();
+
+        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
+        let priv_meta: Metadata = load(&priv_store, &token_key1).unwrap();
+        let priv_meta_old = priv_meta.clone();
+
+        assert_ne!(token.owner, david_raw);
+
+        // Send the NFT as the owner
+
+        let send_msg = Some(
+            to_binary(&HandleMsg::RevokeAll {
+                operator: HumanAddr("alice".to_string()),
+                padding: None,
+            })
+            .unwrap(),
+        );
+
+        let handle_msg = HandleMsg::SendNft {
+            contract: HumanAddr("david".to_string()),
+            receiver_info: None,
+            token_id: "MyNFT".to_string(),
+            msg: send_msg.clone(),
+            memo: Some("Xfer it".to_string()),
+            padding: None,
+        };
+        let _handle_result = handle(
+            &mut deps,
+            Env {
+                block: BlockInfo {
+                    height: 1,
+                    time: 100,
+                    chain_id: "cosmos-testnet-14002".to_string(),
+                },
+                message: MessageInfo {
+                    sender: HumanAddr("alice".to_string()),
+                    sent_funds: vec![],
+                },
+                contract: cosmwasm_std::ContractInfo {
+                    address: HumanAddr::from(MOCK_CONTRACT_ADDR),
+                },
+                contract_key: Some("".to_string()),
+                contract_code_hash: "".to_string(),
+            },
+            handle_msg,
+        );
+
+        // Confirm that the autherization keys have been altered.
+        let info_store = ReadonlyPrefixedStorage::new(PREFIX_INFOS, &deps.storage);
+        let token: Token = json_load(&info_store, &token_key1).unwrap();
+
+        assert_eq!(token.owner, david_raw);
+
+        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        let pub_meta: Metadata = load(&pub_store, &token_key1).unwrap();
+        assert_ne!(pub_meta.extension.unwrap().auth_key, pub_meta_old.extension.unwrap().auth_key);
+        let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
+        let priv_meta: Metadata = load(&priv_store, &token_key1).unwrap();
+        assert_ne!(priv_meta.extension.unwrap().auth_key, priv_meta_old.extension.unwrap().auth_key);
     }
 }
