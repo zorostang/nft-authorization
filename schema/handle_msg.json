@@ -12,6 +12,13 @@
         "mint_nft": {
           "type": "object",
           "properties": {
+            "entropy": {
+              "description": "optional entropy for generating keypair.  Defaults to None if omited.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "memo": {
               "description": "optional memo for the tx",
               "type": [
@@ -112,6 +119,13 @@
             "mints"
           ],
           "properties": {
+            "entropy": {
+              "description": "optional entropy for generating keypair.  Defaults to None if omited.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "mints": {
               "description": "list of mint operations to perform",
               "type": "array",
@@ -143,6 +157,13 @@
             "quantity"
           ],
           "properties": {
+            "entropy": {
+              "description": "optional entropy for generating keypair.  Defaults to None if omited.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "memo": {
               "description": "optional memo for the mint txs",
               "type": [
@@ -262,6 +283,32 @@
             },
             "token_id": {
               "description": "id of the token whose metadata should be updated",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Regenerate the public and private keys used for authentication. This can be called by either the token owner, a valid minter (if they have been given the autherization to modify metadata) or the admin.",
+      "type": "object",
+      "required": [
+        "generate_authentication_keys"
+      ],
+      "properties": {
+        "generate_authentication_keys": {
+          "type": "object",
+          "required": [
+            "token_id"
+          ],
+          "properties": {
+            "entropy": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "token_id": {
               "type": "string"
             }
           }
@@ -1300,6 +1347,20 @@
           "items": {
             "$ref": "#/definitions/Trait"
           }
+        },
+        "auth_key": {
+          "description": "represents public and privite key pair for authentication in public and private metadata respectively.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "format": "uint8",
+            "minimum": 0.0
+          },
+          "maxItems": 32,
+          "minItems": 32
         },
         "background_color": {
           "description": "background color represented as a six-character hexadecimal without a pre-pended #",

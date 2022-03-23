@@ -2598,7 +2598,7 @@ mod tests {
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
-        assert!(error.contains("token_uri cannot be used with nft authorization"));
+        assert!(error.contains("Keys cannot be added to a metadata using token_uri."));
 
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("NFT1".to_string()),

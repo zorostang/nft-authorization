@@ -93,6 +93,25 @@
     {
       "type": "object",
       "required": [
+        "generate_authentication_keys"
+      ],
+      "properties": {
+        "generate_authentication_keys": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "$ref": "#/definitions/ResponseStatus"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
         "set_royalty_info"
       ],
       "properties": {

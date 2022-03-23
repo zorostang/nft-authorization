@@ -7,14 +7,14 @@ use cosmwasm_storage::{PrefixedStorage, ReadonlyPrefixedStorage};
 use primitive_types::U256;
 /// This contract implements SNIP-721 standard:
 /// https://github.com/SecretFoundation/SNIPs/blob/master/SNIP-721.md
-use std::{collections::HashSet, ops::Not};
+use std::{collections::HashSet};
 
 use secret_toolkit::{
     permit::{validate, Permit, RevokedPermits},
     utils::{pad_handle_result, pad_query_result},
 };
 
-use crate::{expiration::Expiration};
+use crate::{expiration::Expiration, token::Extension};
 use crate::inventory::{Inventory, InventoryIter};
 use crate::mint_run::{SerialNumber, StoredMintRunInfo};
 use crate::msg::{
@@ -535,28 +535,26 @@ pub fn metadata_generate_keypair_impl<S: Storage, A: Api, Q: Querier>(
     // update private metadata with the private key.
     let mut priv_meta_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
     let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_store, &idx.to_le_bytes())?;
-
-    match maybe_priv_meta {
-        None => {return Err(StdError::generic_err("This NFT does not have a private metadata associated to it."))},
-        Some(priv_meta) => {
-            enforce_metadata_is_extension(&priv_meta)?;
-            let new_meta =  priv_meta.add_auth_key(&scrtkey.to_bytes()).unwrap();
-            save(&mut priv_meta_store, &idx.to_le_bytes(), &new_meta)?;
-        },
-    }
+    let priv_meta = maybe_priv_meta.unwrap_or(
+        Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        }
+    );
+    let new_priv_meta =  priv_meta.add_auth_key(&scrtkey.to_bytes())?;
+    save(&mut priv_meta_store, &idx.to_le_bytes(), &new_priv_meta)?;
 
     // update public metadata with the public key
     let mut pub_meta_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
     let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_store, &idx.to_le_bytes())?;
-
-    match maybe_pub_meta {
-        None => {return Err(StdError::generic_err("This NFT does not have a public metadata associated to it."))},
-        Some(pub_meta) => {
-            enforce_metadata_is_extension(&pub_meta)?;
-            let new_meta =  pub_meta.add_auth_key(&pubkey.to_bytes()).unwrap();
-            save(&mut pub_meta_store, &idx.to_le_bytes(), &new_meta)?;
-        },
-    }
+    let pub_meta = maybe_pub_meta.unwrap_or(
+        Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        }
+    );
+    let new_pub_meta =  pub_meta.add_auth_key(&pubkey.to_bytes())?;
+    save(&mut pub_meta_store, &idx.to_le_bytes(), &new_pub_meta)?;
 
     Ok(HandleResponse{
         messages: vec![],
@@ -864,29 +862,16 @@ pub fn set_metadata<S: Storage, A: Api, Q: Querier>(
             return Err(StdError::generic_err(custom_err));
         }
     }
-    let mut regenerate_keys = true;
+
     if let Some(public) = public_metadata {
         set_metadata_impl(&mut deps.storage, &token, idx, PREFIX_PUB_META, &public)?;
-        if public.extension.is_none() {
-            regenerate_keys = false;
-        }
-    } else {
-        regenerate_keys = false;
     }
     if let Some(private) = private_metadata {
         set_metadata_impl(&mut deps.storage, &token, idx, PREFIX_PRIV_META, &private)?;
-        if private.extension.is_none() {
-            regenerate_keys  = false;
-        }
-    } else {
-        regenerate_keys = false;
     }
-    if regenerate_keys {
-        let regenerate_keys = metadata_generate_keypair_impl(deps, &env, None, idx);
-        if let Err(_e) = regenerate_keys {
-            return Err(StdError::generic_err("an authentication keypair for these metadata could not be generated."));
-        }
-    }
+    // regenerate keypairs
+    metadata_generate_keypair_impl(deps, &env, None, idx)?;
+
     Ok(HandleResponse {
         messages: vec![],
         log: vec![],
@@ -4547,20 +4532,8 @@ fn transfer_impl<S: Storage, A: Api, Q: Querier>(
     } else {
         Some(sender.clone())
     };
-    // regenerate authentication key pairs if the metadatas' use extension.
-    let priv_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
-    let maybe_priv_meta: Option<Metadata> = may_load(&priv_meta_storage, &idx.to_le_bytes())?;
-    let pub_meta_storage = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-    let maybe_pub_meta: Option<Metadata> = may_load(&pub_meta_storage, &idx.to_le_bytes())?;
-
-    if let (Some(priv_meta), Some(pub_meta)) = (maybe_priv_meta, maybe_pub_meta) {
-        enforce_metadata_is_extension(&priv_meta)?;
-        enforce_metadata_is_extension(&pub_meta)?;
-        let regenerate_keys = metadata_generate_keypair_impl(deps, env, None, idx);
-        if let Err(_e) = regenerate_keys {
-            return Err(StdError::generic_err("an authentication keypair for this NFT could not be generated."));
-        }
-    }
+    // regenerate authentication key pairs.
+    metadata_generate_keypair_impl(deps, env, None, idx)?;
     // store the tx
     store_transfer(
         &mut deps.storage,
@@ -4858,38 +4831,25 @@ fn mint_list<S: Storage, A: Api, Q: Querier>(
         let (pubkey, scrtkey, new_prng_seed) = generate_keypair(env, prng_seed, entropy.clone());
         prng_seed  = new_prng_seed;
 
-        let maybe_priv_meta = mint.private_metadata;
-        match maybe_priv_meta {
-            Some(priv_meta) => {
-                enforce_metadata_is_extension(&priv_meta)?;
-                let priv_meta_with_auth = priv_meta.add_auth_key(&scrtkey.to_bytes());
-                //priv_meta.extension.unwrap().auth_key = Some(scrtkey.to_bytes());
-                let mut priv_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
-                save(&mut priv_store, &token_key, &priv_meta_with_auth.unwrap())?;
+        let priv_meta = mint.private_metadata.unwrap_or(
+            Metadata {
+                token_uri: None,
+                extension: Some(Extension::default()),
             }
-            None => {
-                return Err(StdError::generic_err(
-                    "No private metadata is provided. You must provide some metadata 
-                    even if all the fields are all missing since the authentication keys are stored in extension metadata.",
-                ));
-            }
-        }
+        );
+        let priv_meta_with_auth = priv_meta.add_auth_key(&scrtkey.to_bytes())?;
+        let mut priv_store = PrefixedStorage::new(PREFIX_PRIV_META, &mut deps.storage);
+        save(&mut priv_store, &token_key, &priv_meta_with_auth)?;
 
-        let  maybe_pub_meta = mint.public_metadata;
-        match maybe_pub_meta {
-            Some(pub_meta) => {
-                enforce_metadata_is_extension(&pub_meta)?;
-                let pub_meta_with_auth = pub_meta.add_auth_key(&pubkey.to_bytes());
-                let mut pub_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
-                save(&mut pub_store, &token_key, &pub_meta_with_auth.unwrap())?;
+        let pub_meta = mint.public_metadata.unwrap_or(
+            Metadata {
+                token_uri: None,
+                extension: Some(Extension::default()),
             }
-            None => {
-                return Err(StdError::generic_err(
-                    "No public metadata is provided. You must provide some metadata 
-                    even if all the fields are all missing since the authentication keys are stored in extension metadata.",
-                ));
-            }
-        }
+        );
+        let pub_meta_with_auth = pub_meta.add_auth_key(&pubkey.to_bytes())?;
+        let mut pub_store = PrefixedStorage::new(PREFIX_PUB_META, &mut deps.storage);
+        save(&mut pub_store, &token_key, &pub_meta_with_auth)?;
 
         // save the mint run info
         let (mint_run, serial_number, quantity_minted_this_run) =
@@ -5011,26 +4971,6 @@ fn enforce_metadata_field_exclusion(metadata: &Metadata) -> StdResult<()> {
     if metadata.token_uri.is_some() && metadata.extension.is_some() {
         return Err(StdError::generic_err(
             "Metadata can not have BOTH token_uri AND extension",
-        ));
-    }
-    Ok(())
-}
-
-/// Returns StdResult<()>
-///
-/// makes sure that Metadata does not have `token_uri` and has extension
-///
-/// # Arguments
-///
-/// * `metadata` - a reference to Metadata
-fn enforce_metadata_is_extension(metadata: &Metadata) -> StdResult<()> {
-    if metadata.token_uri.is_some() {
-        return Err(StdError::generic_err(
-            "token_uri cannot be used with nft authorization",
-        ));
-    } else if metadata.extension.is_some().not() {
-        return Err(StdError::generic_err(
-            "the metadata does not cointain token_uri nor extension",
         ));
     }
     Ok(())

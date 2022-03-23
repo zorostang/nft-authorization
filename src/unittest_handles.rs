@@ -484,7 +484,8 @@ mod tests {
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
-        assert!(error.contains("token_uri cannot be used with nft authorization"));
+        println!("{:?}", error);
+        assert!(error.contains("Keys cannot be added to a metadata using token_uri."));
 
         // test non-minter attempt
         let handle_msg = HandleMsg::MintNft {
@@ -973,6 +974,7 @@ mod tests {
                 name: Some("New Name".to_string()),
                 description: Some("I changed the metadata".to_string()),
                 image: Some("new uri".to_string()),
+                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
                 ..Extension::default()
             }),
         });
@@ -982,13 +984,22 @@ mod tests {
             private_metadata: None,
             padding: None,
         };
+        let priv_meta_expect = Metadata {
+            token_uri: None,
+            extension: Some(
+                Extension {
+                    auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                    ..Extension::default()
+                }
+            ),
+        };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
         let pub_meta: Metadata = load(&pub_store, &0u32.to_le_bytes()).unwrap();
         assert_eq!(pub_meta, set_expect.unwrap());
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Option<Metadata> = may_load(&priv_store, &0u32.to_le_bytes()).unwrap();
-        assert!(priv_meta.is_none());
+        assert_eq!(priv_meta, Some(priv_meta_expect));
     }
 
     #[test]
@@ -1163,7 +1174,7 @@ mod tests {
                 name: Some("New Name Pub".to_string()),
                 description: Some("Minter changed the public metadata".to_string()),
                 image: Some("new uri pub".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
                 ..Extension::default()
             }),
         });
@@ -1173,7 +1184,7 @@ mod tests {
                 name: Some("New Name Priv".to_string()),
                 description: Some("Minter changed the private metadata".to_string()),
                 image: Some("new uri priv".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
                 ..Extension::default()
             }),
         });
@@ -1503,9 +1514,9 @@ mod tests {
         let priv_store = ReadonlyPrefixedStorage::new(PREFIX_PRIV_META, &deps.storage);
         let priv_meta: Metadata = load(&priv_store, &token_key).unwrap();
         assert_eq!(priv_meta, seal_meta_expect.unwrap());
-        let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
-        let pub_meta: Option<Metadata> = may_load(&pub_store, &token_key).unwrap();
-        assert!(pub_meta.is_none());
+        //let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
+        //let pub_meta: Option<Metadata> = may_load(&pub_store, &token_key).unwrap();
+        //assert!(pub_meta.is_none());
     }
 
     // test owner setting approval for specific addresses

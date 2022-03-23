@@ -31,21 +31,18 @@ pub struct Metadata {
 
 impl Metadata {
     pub fn add_auth_key(&self, new_key: &[u8; 32]) -> StdResult<Metadata> {
-        match &self.extension {
-            Some(ext) => {
-                return Ok(
-                    Metadata {
-                        token_uri: None,
-                        extension: Some(ext.add_auth_key(new_key)),
-                    }
-                );
-            },
-            None => {
-                return Err(StdError::generic_err(
-                    "the metadata does not cointain extension while authorization key is being added.",
-                ));
-            }
+        if self.token_uri.is_some() {
+            return Err(StdError::generic_err(
+                "Keys cannot be added to a metadata using token_uri.",
+            ));
         }
+        let ext = &self.extension.clone().unwrap_or_default();
+        return Ok(
+            Metadata {
+                token_uri: None,
+                extension: Some(ext.add_auth_key(new_key)),
+            }
+        );
     }
 }
 
@@ -89,10 +86,9 @@ pub struct Extension {
 
 impl Extension {
     fn add_auth_key(&self, new_key: &[u8; 32]) -> Extension {
-        let self_clone = self.clone();
         Extension {
             auth_key: Some(new_key.clone()),
-            ..self_clone
+            ..self.clone()
         }
     }
 }
