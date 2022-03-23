@@ -183,7 +183,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             mints,
             entropy
         ),
-        HandleMsg::MintNftClones { //solved
+        HandleMsg::MintNftClones {
             mint_run_id,
             quantity,
             owner,
@@ -207,7 +207,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             memo,
             entropy,
         ),
-        HandleMsg::SetMetadata { //solved
+        HandleMsg::SetMetadata {
             token_id,
             public_metadata,
             private_metadata,
@@ -221,7 +221,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             public_metadata,
             private_metadata,
         ),
-        HandleMsg::GenerateAuthenticationKeys { //solved
+        HandleMsg::GenerateAuthenticationKeys {
             token_id,
             entropy,
         } => metadata_generate_keypair(
@@ -231,7 +231,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             &token_id,
             entropy,
         ),
-        HandleMsg::SetRoyaltyInfo { //noneed
+        HandleMsg::SetRoyaltyInfo {
             token_id,
             royalty_info,
             ..
@@ -243,23 +243,23 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             token_id.as_deref(),
             royalty_info.as_ref(),
         ),
-        HandleMsg::Reveal { token_id, .. } => reveal( //noneed
+        HandleMsg::Reveal { token_id, .. } => reveal(
             deps,
             env,
             &config,
             ContractStatus::StopTransactions.to_u8(),
             &token_id,
         ),
-        HandleMsg::MakeOwnershipPrivate { .. } => { //noneed
+        HandleMsg::MakeOwnershipPrivate { .. } => {
             make_owner_private(deps, env, &config, ContractStatus::StopTransactions.to_u8())
         }
-        HandleMsg::SetGlobalApproval { //noneed
+        HandleMsg::SetGlobalApproval {
             token_id,
             view_owner,
             view_private_metadata,
             expires,
             ..
-        } => set_global_approval( //noneed
+        } => set_global_approval(
             deps,
             env,
             &config,
@@ -269,7 +269,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             view_private_metadata,
             expires,
         ),
-        HandleMsg::SetWhitelistedApproval { //noneed
+        HandleMsg::SetWhitelistedApproval {
             address,
             token_id,
             view_owner,
@@ -290,7 +290,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             SetAppResp::SetWhitelistedApproval,
         ),
-        HandleMsg::Approve { //noneed
+        HandleMsg::Approve {
             spender,
             token_id,
             expires,
@@ -305,7 +305,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             true,
         ),
-        HandleMsg::Revoke { //noneed
+        HandleMsg::Revoke {
             spender, token_id, ..
         } => approve_revoke(
             deps,
@@ -317,7 +317,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             None,
             false,
         ),
-        HandleMsg::ApproveAll { //noneed
+        HandleMsg::ApproveAll {
             operator, expires, ..
         } => set_whitelisted_approval(
             deps,
@@ -332,7 +332,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             expires,
             SetAppResp::ApproveAll,
         ),
-        HandleMsg::RevokeAll { operator, .. } => set_whitelisted_approval( //noneed
+        HandleMsg::RevokeAll { operator, .. } => set_whitelisted_approval(
             deps,
             env,
             &config,
@@ -345,7 +345,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             None,
             SetAppResp::RevokeAll,
         ),
-        HandleMsg::TransferNft { //solved
+        HandleMsg::TransferNft {
             recipient,
             token_id,
             memo,
@@ -359,14 +359,14 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
             token_id,
             memo,
         ),
-        HandleMsg::BatchTransferNft { transfers, .. } => batch_transfer_nft( //solved
+        HandleMsg::BatchTransferNft { transfers, .. } => batch_transfer_nft(
             deps,
             env,
             &mut config,
             ContractStatus::Normal.to_u8(),
             transfers,
         ),
-        HandleMsg::SendNft { 
+        HandleMsg::SendNft {
             contract,
             receiver_info,
             token_id,
