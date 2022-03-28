@@ -15,6 +15,7 @@ mod unittest_mint_run;
 mod unittest_non_transferable;
 mod unittest_queries;
 mod unittest_royalties;
+mod unittest_authentication;
 mod utils;
 mod viewing_key;
 

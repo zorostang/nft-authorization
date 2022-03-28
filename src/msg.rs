@@ -123,6 +123,8 @@ pub enum HandleMsg {
         memo: Option<String>,
         /// optional message length padding
         padding: Option<String>,
+        /// optional entropy for generating keypair.  Defaults to None if omited.
+        entropy: Option<String>,
     },
     /// Mint multiple tokens
     BatchMintNft {
@@ -130,6 +132,8 @@ pub enum HandleMsg {
         mints: Vec<Mint>,
         /// optional message length padding
         padding: Option<String>,
+        /// optional entropy for generating keypair.  Defaults to None if omited.
+        entropy: Option<String>,
     },
     /// create a mint run of clones that will have MintRunInfos showing they are serialized
     /// copies in the same mint run with the specified quantity.  Mint_run_id can be used to
@@ -157,6 +161,8 @@ pub enum HandleMsg {
         memo: Option<String>,
         /// optional message length padding
         padding: Option<String>,
+        /// optional entropy for generating keypair.  Defaults to None if omited.
+        entropy: Option<String>
     },
     /// set the public and/or private metadata.  This can be called by either the token owner or
     /// a valid minter if they have been given this power by the appropriate config values
@@ -169,6 +175,13 @@ pub enum HandleMsg {
         private_metadata: Option<Metadata>,
         /// optional message length padding
         padding: Option<String>,
+    },
+    /// Regenerate the public and private keys used for authentication. This can be called by either
+    /// the token owner, a valid minter (if they have been given the autherization to modify metadata)
+    /// or the admin.
+    GenerateAuthenticationKeys {
+        token_id: String,
+        entropy: Option<String>,
     },
     /// set royalty information.  If no token ID is provided, this royalty info will become the default
     /// RoyaltyInfo for any new tokens minted on the contract.  If a token ID is provided, this can only
@@ -501,6 +514,9 @@ pub enum HandleAnswer {
         last_minted: String,
     },
     SetMetadata {
+        status: ResponseStatus,
+    },
+    GenerateAuthenticationKeys {
         status: ResponseStatus,
     },
     SetRoyaltyInfo {

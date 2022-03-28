@@ -48,5 +48,8 @@ rand_chacha = { version = "0.2.2", default-features = false }
 rand_core = { version =  "0.5.1", default-features = false }
 sha2 = { version = "0.9.1", default-features = false }
 
+x25519-dalek = "1.1"
+rand = "0.7.3"
+
 [dev-dependencies]
 cosmwasm-schema = "0.10.1"

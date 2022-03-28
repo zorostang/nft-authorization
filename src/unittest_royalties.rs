@@ -7,6 +7,7 @@ mod tests {
     };
     use crate::royalties::{DisplayRoyalty, DisplayRoyaltyInfo, Royalty, RoyaltyInfo};
     use crate::state::{load, Config, CONFIG_KEY};
+    use crate::token::{Extension, Metadata};
     use cosmwasm_std::testing::*;
     use cosmwasm_std::{
         from_binary, to_binary, Api, Binary, Coin, CosmosMsg, Extern, HumanAddr, InitResponse,
@@ -311,6 +312,11 @@ mod tests {
             init_result.err().unwrap()
         );
 
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
+
         let royalties = RoyaltyInfo {
             decimal_places_in_rates: 2,
             royalties: vec![
@@ -602,13 +608,14 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("default".to_string()),
             owner: Some(alice.clone()),
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             serial_number: None,
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -650,13 +657,14 @@ mod tests {
         let handle_msg = HandleMsg::MintNft {
             token_id: Some("specified".to_string()),
             owner: None,
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: Some(individual.clone()),
             serial_number: None,
             transferable: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());

@@ -1005,6 +1005,20 @@
             "$ref": "#/definitions/Trait"
           }
         },
+        "auth_key": {
+          "description": "represents public and privite key pair for authentication in public and private metadata respectively.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "format": "uint8",
+            "minimum": 0.0
+          },
+          "maxItems": 32,
+          "minItems": 32
+        },
         "background_color": {
           "description": "background color represented as a six-character hexadecimal without a pre-pended #",
           "type": [

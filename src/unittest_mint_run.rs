@@ -3,6 +3,7 @@ mod tests {
     use crate::contract::{handle, init, query};
     use crate::mint_run::MintRunInfo;
     use crate::msg::{HandleMsg, InitMsg, QueryAnswer, QueryMsg};
+    use crate::token::{Extension, Metadata};
     use cosmwasm_std::testing::*;
     use cosmwasm_std::{from_binary, Extern, HumanAddr, InitResponse, StdError, StdResult};
     use std::any::Any;
@@ -59,6 +60,7 @@ mod tests {
             royalty_info: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("alice", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -74,21 +76,28 @@ mod tests {
             royalty_info: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
         assert!(error.contains("Quantity can not be zero"));
+
+        let empty_metadata = Metadata {
+            token_uri: None,
+            extension: Some(Extension::default()),
+        };
 
         // test no mint_run_id
         let handle_msg = HandleMsg::MintNftClones {
             mint_run_id: None,
             quantity: 3,
             owner: None,
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -163,11 +172,12 @@ mod tests {
             mint_run_id: Some("Starry Night".to_string()),
             quantity: 1,
             owner: None,
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -199,11 +209,12 @@ mod tests {
             mint_run_id: Some("Starry Night".to_string()),
             quantity: 2,
             owner: None,
-            public_metadata: None,
-            private_metadata: None,
+            public_metadata: Some(empty_metadata.clone()),
+            private_metadata: Some(empty_metadata.clone()),
             royalty_info: None,
             memo: None,
             padding: None,
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());

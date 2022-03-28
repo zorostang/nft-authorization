@@ -1,12 +1,12 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::CanonicalAddr;
+use cosmwasm_std::{CanonicalAddr, StdResult, StdError};
 
 use crate::state::Permission;
 
 /// token
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Token {
     /// owner
     pub owner: CanonicalAddr,
@@ -27,6 +27,23 @@ pub struct Metadata {
     pub token_uri: Option<String>,
     /// optional on-chain metadata.  Only use this if you are not using `token_uri`
     pub extension: Option<Extension>,
+}
+
+impl Metadata {
+    pub fn add_auth_key(&self, new_key: &[u8; 32]) -> StdResult<Metadata> {
+        if self.token_uri.is_some() {
+            return Err(StdError::generic_err(
+                "Keys cannot be added to a metadata using token_uri.",
+            ));
+        }
+        let ext = &self.extension.clone().unwrap_or_default();
+        return Ok(
+            Metadata {
+                token_uri: None,
+                extension: Some(ext.add_auth_key(new_key)),
+            }
+        );
+    }
 }
 
 /// metadata extension
@@ -63,6 +80,17 @@ pub struct Extension {
     pub protected_attributes: Option<Vec<String>>,
     /// token subtypes used by Stashh for display groupings (primarily used for badges)
     pub token_subtype: Option<String>,
+    /// represents public and privite key pair for authentication in public and private metadata respectively.
+    pub auth_key: Option<[u8; 32]>
+}
+
+impl Extension {
+    fn add_auth_key(&self, new_key: &[u8; 32]) -> Extension {
+        Extension {
+            auth_key: Some(new_key.clone()),
+            ..self.clone()
+        }
+    }
 }
 
 /// attribute trait
