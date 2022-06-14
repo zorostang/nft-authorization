@@ -2030,7 +2030,7 @@ pub fn permit_queries<S: Storage, A: Api, Q: Querier>(
         PREFIX_REVOKED_PERMITS,
         &permit,
         my_address,
-        None,
+        Some("secret"),
     )?))?;
     if !permit.check_permission(&secret_toolkit::permit::TokenPermissions::Owner) {
         return Err(StdError::generic_err(format!(
