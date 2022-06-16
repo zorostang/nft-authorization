@@ -770,7 +770,10 @@ mod tests {
                 name: Some("Name1".to_string()),
                 description: Some("PubDesc1".to_string()),
                 image: Some("PubUri1".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -780,7 +783,10 @@ mod tests {
                 name: Some("PrivName1".to_string()),
                 description: Some("PrivDesc1".to_string()),
                 image: Some("PrivUri1".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -2514,7 +2520,10 @@ mod tests {
                 name: None,
                 description: None,
                 image: None,
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -2578,7 +2587,10 @@ mod tests {
                 name: Some("Name1".to_string()),
                 description: Some("PubDesc1".to_string()),
                 image: Some("PubUri1".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -2678,7 +2690,7 @@ mod tests {
         let query_result = query(&deps, query_msg);
         let query_answer: QueryAnswer = from_binary(&query_result.unwrap()).unwrap();
         match query_answer {
-            QueryAnswer::AllNftInfo { access, info:_ } => {
+            QueryAnswer::AllNftInfo { access, info: _ } => {
                 assert_eq!(access.owner, Some(alice.clone()));
                 assert_eq!(access.approvals.len(), 1);
                 // assert!(info.is_none());
@@ -2710,7 +2722,10 @@ mod tests {
                 name: Some("Name1".to_string()),
                 description: Some("PrivDesc1".to_string()),
                 image: Some("PrivUri1".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -3920,7 +3935,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
-            entropy: None
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());
@@ -4393,7 +4408,10 @@ mod tests {
                 name: Some("Name1".to_string()),
                 description: Some("PubDesc1".to_string()),
                 image: Some("PubUri1".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -4403,7 +4421,10 @@ mod tests {
                 name: Some("PrivName1".to_string()),
                 description: Some("PrivDesc1".to_string()),
                 image: Some("PrivUri1".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -4413,7 +4434,10 @@ mod tests {
                 name: Some("Name2".to_string()),
                 description: Some("PubDesc2".to_string()),
                 image: Some("PubUri2".to_string()),
-                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
+                auth_key: Some([
+                    2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25,
+                    191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -4423,7 +4447,10 @@ mod tests {
                 name: Some("PrivName2".to_string()),
                 description: Some("PrivDesc2".to_string()),
                 image: Some("PrivUri2".to_string()),
-                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -4434,7 +4461,10 @@ mod tests {
                 name: Some("Name3".to_string()),
                 description: Some("PubDesc3".to_string()),
                 image: Some("PubUri3".to_string()),
-                auth_key: Some([200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16, 176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103]),
+                auth_key: Some([
+                    200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16,
+                    176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -4484,7 +4514,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
-            entropy: None
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         assert!(handle_result.is_ok());

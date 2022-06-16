@@ -11,7 +11,7 @@ No changes were made to query messsages or the init message. Only a few changes 
 The only caveat is that Minting with no metadata or with no extenision field causes the program to create a default metadata with all fields inside its extension struct set to `None` except for `auth_key` which is generated upon minting.
 
 A new handle message was added called `GenerateAuthenticationKeys`. This handle message is used to generate a new pair of public/private keys on demand and remove the previous keypair. The owner and the admin can use this, the minter can also use this if `minter_may_update_metadata: true` in the config.
-```
+```rust
 GenerateAuthenticationKeys {
         token_id: String,
         entropy: Option<String>,
@@ -20,7 +20,7 @@ GenerateAuthenticationKeys {
 
 ## New Functions to understand
 The most important new function to understand is `metadata_generate_keypair_impl()` in `contract.rs`
-```
+```rust
 pub fn metadata_generate_keypair_impl<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: &Env,

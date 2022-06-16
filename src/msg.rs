@@ -162,7 +162,7 @@ pub enum HandleMsg {
         /// optional message length padding
         padding: Option<String>,
         /// optional entropy for generating keypair.  Defaults to None if omited.
-        entropy: Option<String>
+        entropy: Option<String>,
     },
     /// set the public and/or private metadata.  This can be called by either the token owner or
     /// a valid minter if they have been given this power by the appropriate config values
