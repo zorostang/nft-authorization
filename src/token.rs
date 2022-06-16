@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::{CanonicalAddr, StdResult, StdError};
+use cosmwasm_std::{CanonicalAddr, StdError, StdResult};
 
 use crate::state::Permission;
 
@@ -37,12 +37,10 @@ impl Metadata {
             ));
         }
         let ext = &self.extension.clone().unwrap_or_default();
-        return Ok(
-            Metadata {
-                token_uri: None,
-                extension: Some(ext.add_auth_key(new_key)),
-            }
-        );
+        return Ok(Metadata {
+            token_uri: None,
+            extension: Some(ext.add_auth_key(new_key)),
+        });
     }
 }
 
@@ -81,7 +79,7 @@ pub struct Extension {
     /// token subtypes used by Stashh for display groupings (primarily used for badges)
     pub token_subtype: Option<String>,
     /// represents public and privite key pair for authentication in public and private metadata respectively.
-    pub auth_key: Option<[u8; 32]>
+    pub auth_key: Option<[u8; 32]>,
 }
 
 impl Extension {

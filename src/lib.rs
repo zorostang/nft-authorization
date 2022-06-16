@@ -9,13 +9,13 @@ pub mod receiver;
 pub mod royalties;
 pub mod state;
 pub mod token;
+mod unittest_authentication;
 mod unittest_handles;
 mod unittest_inventory;
 mod unittest_mint_run;
 mod unittest_non_transferable;
 mod unittest_queries;
 mod unittest_royalties;
-mod unittest_authentication;
 mod utils;
 mod viewing_key;
 

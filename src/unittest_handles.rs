@@ -230,7 +230,10 @@ mod tests {
                 description: Some("pub1".to_string()),
                 image: Some("uri1".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -241,7 +244,10 @@ mod tests {
                 description: Some("priv2".to_string()),
                 image: Some("uri2".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
                 ..Extension::default()
             }),
         };
@@ -298,7 +304,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
-            entropy: None
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -314,7 +320,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
-            entropy: None
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("alice", &[]), handle_msg);
         let error = extract_error_msg(handle_result);
@@ -324,7 +330,7 @@ mod tests {
         let handle_msg = HandleMsg::BatchMintNft {
             mints: mints.clone(),
             padding: None,
-            entropy: None
+            entropy: None,
         };
         let handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let minted_vec = vec![
@@ -556,7 +562,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: None,
                 image: Some("uri".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -566,7 +575,10 @@ mod tests {
                 name: Some("MyNFTpriv".to_string()),
                 description: Some("Nifty".to_string()),
                 image: Some("privuri".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -681,7 +693,10 @@ mod tests {
                 name: Some("AdminNFT".to_string()),
                 description: None,
                 image: None,
-                auth_key: Some([2, 99, 130, 216, 58, 179, 225, 37, 98, 200, 87, 214, 73, 113, 15, 61, 73, 173, 63, 60, 31, 157, 254, 225, 79, 80, 78, 246, 26, 57, 109, 57]),
+                auth_key: Some([
+                    2, 99, 130, 216, 58, 179, 225, 37, 98, 200, 87, 214, 73, 113, 15, 61, 73, 173,
+                    63, 60, 31, 157, 254, 225, 79, 80, 78, 246, 26, 57, 109, 57,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -974,7 +989,10 @@ mod tests {
                 name: Some("New Name".to_string()),
                 description: Some("I changed the metadata".to_string()),
                 image: Some("new uri".to_string()),
-                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
+                auth_key: Some([
+                    2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25,
+                    191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -986,12 +1004,13 @@ mod tests {
         };
         let priv_meta_expect = Metadata {
             token_uri: None,
-            extension: Some(
-                Extension {
-                    auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
-                    ..Extension::default()
-                }
-            ),
+            extension: Some(Extension {
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
+                ..Extension::default()
+            }),
         };
         let _handle_result = handle(&mut deps, mock_env("admin", &[]), handle_msg);
         let pub_store = ReadonlyPrefixedStorage::new(PREFIX_PUB_META, &deps.storage);
@@ -1174,7 +1193,10 @@ mod tests {
                 name: Some("New Name Pub".to_string()),
                 description: Some("Minter changed the public metadata".to_string()),
                 image: Some("new uri pub".to_string()),
-                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
+                auth_key: Some([
+                    2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25,
+                    191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1184,7 +1206,10 @@ mod tests {
                 name: Some("New Name Priv".to_string()),
                 description: Some("Minter changed the private metadata".to_string()),
                 image: Some("new uri priv".to_string()),
-                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1266,7 +1291,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: None,
                 image: Some("uri".to_string()),
-                auth_key: Some([131, 16, 117, 75, 87, 73, 231, 46, 36, 52, 48, 13, 157, 95, 42, 192, 244, 151, 215, 53, 192, 121, 221, 233, 26, 133, 178, 55, 196, 40, 228, 120]),
+                auth_key: Some([
+                    131, 16, 117, 75, 87, 73, 231, 46, 36, 52, 48, 13, 157, 95, 42, 192, 244, 151,
+                    215, 53, 192, 121, 221, 233, 26, 133, 178, 55, 196, 40, 228, 120,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1289,7 +1317,10 @@ mod tests {
                 name: Some("New Name".to_string()),
                 description: Some("Owner changed the metadata".to_string()),
                 image: Some("new uri".to_string()),
-                auth_key: Some([112, 114, 227, 184, 220, 231, 1, 166, 16, 50, 142, 97, 197, 41, 233, 74, 62, 45, 132, 154, 142, 166, 161, 38, 211, 173, 184, 78, 238, 106, 109, 92]),
+                auth_key: Some([
+                    112, 114, 227, 184, 220, 231, 1, 166, 16, 50, 142, 97, 197, 41, 233, 74, 62,
+                    45, 132, 154, 142, 166, 161, 38, 211, 173, 184, 78, 238, 106, 109, 92,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1447,7 +1478,10 @@ mod tests {
                 description: Some("Sealed metadata test".to_string()),
                 image: Some("sealed_uri".to_string()),
                 // auth key added to ensure tests pass. The auth key is obtained by running the code first
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1577,7 +1611,10 @@ mod tests {
                 name: Some("My1".to_string()),
                 description: Some("Public 1".to_string()),
                 image: Some("URI 1".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1600,7 +1637,10 @@ mod tests {
                 name: Some("My2".to_string()),
                 description: Some("Public 2".to_string()),
                 image: Some("URI 2".to_string()),
-                auth_key: Some([2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25, 191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111]),
+                auth_key: Some([
+                    2, 150, 93, 115, 7, 33, 172, 31, 219, 91, 234, 185, 197, 245, 76, 43, 67, 25,
+                    191, 62, 176, 230, 101, 128, 18, 211, 184, 141, 245, 195, 206, 111,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -1623,7 +1663,10 @@ mod tests {
                 name: Some("My3".to_string()),
                 description: Some("Public 3".to_string()),
                 image: Some("URI 3".to_string()),
-                auth_key: Some([200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16, 176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103]),
+                auth_key: Some([
+                    200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16,
+                    176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -3515,7 +3558,10 @@ mod tests {
                 description: Some("metadata".to_string()),
                 image: Some("uri".to_string()),
                 // auth_key added so that tests can pass.
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -3823,7 +3869,10 @@ mod tests {
                 description: Some("metadata2".to_string()),
                 image: Some("uri2".to_string()),
                 // auth key added so that the test can pass
-                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -4048,7 +4097,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("metadata".to_string()),
                 image: Some("uri".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -4430,7 +4482,10 @@ mod tests {
                 name: Some("MyNFT2".to_string()),
                 description: Some("metadata2".to_string()),
                 image: Some("uri2".to_string()),
-                auth_key: Some([240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232, 248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96]),
+                auth_key: Some([
+                    240, 119, 252, 251, 103, 218, 209, 61, 111, 246, 108, 92, 23, 30, 239, 232,
+                    248, 62, 234, 238, 111, 16, 197, 243, 196, 150, 9, 113, 170, 83, 156, 96,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -4899,7 +4954,10 @@ mod tests {
                 name: Some("MyNFT3".to_string()),
                 description: Some("privmetadata3".to_string()),
                 image: Some("privuri3".to_string()),
-                auth_key: Some([176, 111, 11, 80, 249, 177, 234, 33, 35, 227, 191, 85, 240, 45, 238, 236, 93, 85, 38, 203, 215, 164, 55, 170, 155, 60, 58, 162, 209, 229, 85, 80]),
+                auth_key: Some([
+                    176, 111, 11, 80, 249, 177, 234, 33, 35, 227, 191, 85, 240, 45, 238, 236, 93,
+                    85, 38, 203, 215, 164, 55, 170, 155, 60, 58, 162, 209, 229, 85, 80,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -4909,7 +4967,10 @@ mod tests {
                 name: Some("MyNFT3".to_string()),
                 description: Some("pubmetadata3".to_string()),
                 image: Some("puburi3".to_string()),
-                auth_key: Some([200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16, 176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103]),
+                auth_key: Some([
+                    200, 171, 139, 161, 69, 212, 33, 8, 40, 241, 114, 12, 148, 3, 140, 178, 31, 16,
+                    176, 15, 229, 78, 97, 160, 97, 81, 21, 29, 52, 24, 231, 103,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6130,7 +6191,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
-                auth_key: Some([48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205, 169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75]),
+                auth_key: Some([
+                    48, 115, 18, 104, 195, 51, 92, 81, 158, 41, 136, 240, 110, 99, 143, 45, 205,
+                    169, 50, 7, 144, 193, 145, 103, 45, 245, 126, 213, 96, 204, 36, 75,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6140,7 +6204,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
-                auth_key: Some([208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156, 236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87]),
+                auth_key: Some([
+                    208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156,
+                    236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6150,7 +6217,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
-                auth_key: Some([0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73, 132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109]),
+                auth_key: Some([
+                    0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73,
+                    132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6160,7 +6230,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6170,7 +6243,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
-                auth_key: Some([8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195, 117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18]),
+                auth_key: Some([
+                    8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195,
+                    117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -6180,7 +6256,10 @@ mod tests {
                 name: Some("MyNFT".to_string()),
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
-                auth_key: Some([113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183, 180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79]),
+                auth_key: Some([
+                    113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183,
+                    180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -7674,7 +7753,10 @@ mod tests {
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156, 236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87]),
+                auth_key: Some([
+                    208, 113, 84, 145, 249, 71, 140, 31, 42, 167, 251, 31, 33, 35, 79, 142, 156,
+                    236, 113, 237, 8, 117, 196, 201, 73, 244, 126, 98, 182, 75, 189, 87,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -7685,7 +7767,10 @@ mod tests {
                 description: Some("privmetadata".to_string()),
                 image: Some("privuri".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73, 132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109]),
+                auth_key: Some([
+                    0, 42, 53, 67, 244, 75, 69, 214, 245, 49, 12, 66, 232, 137, 26, 229, 128, 73,
+                    132, 165, 188, 165, 55, 81, 10, 77, 216, 22, 190, 166, 199, 109,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -7705,7 +7790,10 @@ mod tests {
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195, 117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18]),
+                auth_key: Some([
+                    8, 195, 20, 171, 125, 124, 140, 119, 227, 89, 6, 211, 35, 66, 25, 6, 76, 195,
+                    117, 123, 34, 0, 115, 104, 204, 9, 61, 107, 78, 27, 131, 18,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -7716,7 +7804,10 @@ mod tests {
                 description: Some("pubmetadata".to_string()),
                 image: Some("puburi".to_string()),
                 // auth key added to pass tests
-                auth_key: Some([113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183, 180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79]),
+                auth_key: Some([
+                    113, 46, 208, 113, 184, 25, 79, 160, 141, 106, 237, 84, 5, 169, 217, 207, 183,
+                    180, 149, 149, 35, 39, 170, 82, 16, 41, 127, 220, 205, 233, 115, 79,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -10256,7 +10347,10 @@ mod tests {
                 name: Some("My1".to_string()),
                 description: Some("Pub 1".to_string()),
                 image: Some("URI 1".to_string()),
-                auth_key: Some([223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188, 136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43]),
+                auth_key: Some([
+                    223, 216, 66, 167, 222, 168, 156, 52, 25, 176, 145, 253, 195, 240, 51, 91, 188,
+                    136, 91, 34, 204, 32, 253, 237, 84, 136, 213, 172, 118, 162, 237, 43,
+                ]),
                 ..Extension::default()
             }),
         });
@@ -10572,7 +10666,6 @@ mod tests {
     // test permissioning works
     #[test]
     fn test_check_permission() {
-
         let empty_metadata = Metadata {
             token_uri: None,
             extension: Some(Extension::default()),
