@@ -1,3 +1,5 @@
+This is a link to the frontend repo demonstrating NFT authorization: https://github.com/zorostang/nft-authorization-front-end
+
 # SNIP-721 nft-authorization
 This contract is a reference implementation using [Baedrik's SNIP-721 implementation](https://github.com/baedrik/snip721-reference-impl) as a framework, for web3 authentication by proving the ownership of the NFT via a public-private key pair.
 
